@@ -29,27 +29,27 @@ const getBinancePrice = async ({
   marketName: string;
   bitcoinAmount: number;
   USDAmount: number;
+  error?: string;
 }> => {
   let totalPrice = 0;
   let amount = 0;
-
+  const limit = getLimit({ bitcoinAmount, retry });
   const url = new URL("https://api.binance.com/api/v3/depth?symbol=BTCUSDT");
-  url.searchParams.set("limit", getLimit({ bitcoinAmount, retry }));
+  url.searchParams.set("limit", limit);
 
   const response = await fetch(String(url));
   const { asks: askList } = await response.json();
+
+  console.log(askList);
 
   askList.forEach(([askListItemPrice, askListItemAmount]: [string, string]) => {
     const askPrice = Number(askListItemPrice);
     const askAmount = Number(askListItemAmount);
 
     const shouldContinue = amount < bitcoinAmount;
-    const shouldBuyWholeAskedAmount = amount + askAmount <= bitcoinAmount;
-    const missingAmount = bitcoinAmount - amount;
+    if (!shouldContinue) return;
 
-    if (!shouldContinue) {
-      return;
-    }
+    const shouldBuyWholeAskedAmount = amount + askAmount <= bitcoinAmount;
 
     if (shouldBuyWholeAskedAmount) {
       amount += askAmount;
@@ -57,15 +57,27 @@ const getBinancePrice = async ({
       return;
     }
 
+    const missingAmount = bitcoinAmount - amount;
     amount += missingAmount;
     totalPrice += missingAmount * askPrice;
   });
 
-  if ((amount = bitcoinAmount)) {
+  if (amount === bitcoinAmount) {
     return { marketName: "binance", bitcoinAmount, USDAmount: totalPrice };
   }
+
+  if (limit === "10")
+    return {
+      marketName: "binance",
+      bitcoinAmount,
+      USDAmount: totalPrice,
+      error: `Sorry, offers on Binance are limited to BTC ${amount} that are available at the price of USD ${totalPrice} atm`,
+    };
 
   return getBinancePrice({ bitcoinAmount, retry: retry + 1 });
 };
 
 export default getBinancePrice;
+
+//while loop
+//error handling for not enough bitcoins
