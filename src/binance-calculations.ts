@@ -1,4 +1,4 @@
-const MAX_LIMIT = "500";
+const MAX_LIMIT = "5000";
 
 const getLimit = ({
   bitcoinAmount,
@@ -7,7 +7,7 @@ const getLimit = ({
   bitcoinAmount: number;
   retry?: number;
 }): string => {
-  const levels = ["10", "20", "50", "100", "500"];
+  const levels = ["10", "20", "50", "100", "500", "1000", "5000"];
   const basicLevel = 0 + retry;
 
   let limit = MAX_LIMIT;
@@ -39,8 +39,9 @@ const getBinancePrice = async ({
   let totalPrice = 0;
   let amount = 0;
 
-  const url = new URL("https://api.binance.com/api/v3/depth?symbol=BTCUSDT");
+  const url = new URL("https://api.binance.com/api/v3/depth");
   url.searchParams.set("limit", limit);
+  url.searchParams.set("symbol", "BTCUSDT");
 
   const response = await fetch(String(url));
   const { asks: askList } = await response.json();
