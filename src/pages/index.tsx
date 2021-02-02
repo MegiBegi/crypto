@@ -6,7 +6,7 @@ const Binance = () => {
   const [price, setPrice] = useState(null);
 
   useEffect(() => {
-    getBinancePrice({ bitcoinAmount: 3 }).then((price) => setPrice(price));
+    getBinancePrice({ bitcoinAmount: 4 }).then((price) => setPrice(price));
   }, []);
 
   return (

@@ -1,3 +1,5 @@
+const MAX_LIMIT = "500";
+
 const getLimit = ({
   bitcoinAmount,
   retry,
@@ -8,7 +10,7 @@ const getLimit = ({
   const levels = ["10", "20", "50", "100", "500"];
   const basicLevel = 0 + retry;
 
-  let limit = "500";
+  let limit = MAX_LIMIT;
 
   if (bitcoinAmount < 1) limit = levels[basicLevel];
   if (bitcoinAmount >= 1 && bitcoinAmount <= 5) limit = levels[basicLevel + 1];
@@ -19,65 +21,67 @@ const getLimit = ({
   return limit;
 };
 
+type Result = {
+  marketName: string;
+  bitcoinAmount: number;
+  USDAmount?: number;
+  error?: string;
+};
 const getBinancePrice = async ({
   bitcoinAmount,
   retry = 0,
 }: {
   bitcoinAmount: number;
   retry?: number;
-}): Promise<{
-  marketName: string;
-  bitcoinAmount: number;
-  USDAmount: number;
-  error?: string;
-}> => {
+}): Promise<Result> => {
+  const limit = getLimit({ bitcoinAmount, retry });
+  let itemIndex = 0;
   let totalPrice = 0;
   let amount = 0;
-  const limit = getLimit({ bitcoinAmount, retry });
+
   const url = new URL("https://api.binance.com/api/v3/depth?symbol=BTCUSDT");
   url.searchParams.set("limit", limit);
 
   const response = await fetch(String(url));
   const { asks: askList } = await response.json();
 
-  console.log(askList);
+  const result: Result = { marketName: "Binance", bitcoinAmount };
 
-  askList.forEach(([askListItemPrice, askListItemAmount]: [string, string]) => {
+  if (askList?.length === 0) {
+    result.error = "Sorry, there is no data available for Binance atm.";
+    return result;
+  }
+
+  while (askList[itemIndex] && amount < bitcoinAmount) {
+    const [askListItemPrice, askListItemAmount] = askList[itemIndex];
     const askPrice = Number(askListItemPrice);
     const askAmount = Number(askListItemAmount);
-
-    const shouldContinue = amount < bitcoinAmount;
-    if (!shouldContinue) return;
-
     const shouldBuyWholeAskedAmount = amount + askAmount <= bitcoinAmount;
 
     if (shouldBuyWholeAskedAmount) {
       amount += askAmount;
       totalPrice += askAmount * askPrice;
-      return;
+    } else {
+      const missingAmount = bitcoinAmount - amount;
+      amount += missingAmount;
+      totalPrice += missingAmount * askPrice;
     }
 
-    const missingAmount = bitcoinAmount - amount;
-    amount += missingAmount;
-    totalPrice += missingAmount * askPrice;
-  });
-
-  if (amount === bitcoinAmount) {
-    return { marketName: "binance", bitcoinAmount, USDAmount: totalPrice };
+    itemIndex++;
   }
 
-  if (limit === "10")
-    return {
-      marketName: "binance",
-      bitcoinAmount,
-      USDAmount: totalPrice,
-      error: `Sorry, offers on Binance are limited to BTC ${amount} that are available at the price of USD ${totalPrice} atm`,
-    };
+  if (amount === bitcoinAmount) {
+    result.USDAmount = totalPrice;
+    return result;
+  }
+
+  if (limit === MAX_LIMIT) {
+    result.USDAmount = totalPrice;
+    result.error = `Sorry, offers at Binance are limited to BTC ${amount} currently being sold at the price of USD ${totalPrice}`;
+    return result;
+  }
 
   return getBinancePrice({ bitcoinAmount, retry: retry + 1 });
 };
 
 export default getBinancePrice;
-
-//while loop
-//error handling for not enough bitcoins
