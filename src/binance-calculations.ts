@@ -1,5 +1,10 @@
 const MAX_LIMIT = "5000";
 
+/* SAMPLES
+binanceBids = [['33610.34000000', '0.20000000']]
+binanceAsks = [['33610.35000000', '0.00000600']]
+*/
+
 const getLimit = ({
   bitcoinAmount,
   retry,
@@ -7,18 +12,15 @@ const getLimit = ({
   bitcoinAmount: number;
   retry?: number;
 }): string => {
-  const levels = ["10", "20", "50", "100", "500", "1000", "5000"];
-  const basicLevel = 0 + retry;
+  const levels = ["50", "100", "500", "1000", "5000"];
+  let limitIndex = 0;
 
-  let limit = MAX_LIMIT;
+  if (bitcoinAmount > 50) limitIndex = 4;
+  if (bitcoinAmount > 25) limitIndex = 3;
+  if (bitcoinAmount > 5) limitIndex = 2;
+  if (bitcoinAmount > 2) limitIndex = 1;
 
-  if (bitcoinAmount < 1) limit = levels[basicLevel];
-  if (bitcoinAmount >= 1 && bitcoinAmount <= 5) limit = levels[basicLevel + 1];
-  if (bitcoinAmount > 5 && bitcoinAmount <= 10) limit = levels[basicLevel + 2];
-  if (bitcoinAmount > 10 && bitcoinAmount <= 20) limit = levels[basicLevel + 3];
-  if (bitcoinAmount > 20 && bitcoinAmount <= 50) limit = levels[basicLevel + 4];
-
-  return limit;
+  return levels[limitIndex + retry];
 };
 
 type Result = {
