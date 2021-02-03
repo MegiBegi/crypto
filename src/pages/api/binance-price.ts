@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import getBinancePrice from "../../binance-calculations";
+import getBinancePrice from "../../../lib/binance-calculations";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { method, query } = req;

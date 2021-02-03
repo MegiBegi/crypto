@@ -1,3 +1,5 @@
+import { getOrderBookValues } from "./helpers";
+
 const MAX_LIMIT = "5000";
 
 /* SAMPLES
@@ -37,9 +39,6 @@ const getBinancePrice = async ({
   retry?: number;
 }): Promise<Result> => {
   const limit = getLimit({ bitcoinAmount, retry });
-  let itemIndex = 0;
-  let totalPrice = 0;
-  let amount = 0;
 
   const url = new URL("https://api.binance.com/api/v3/depth");
   url.searchParams.set("limit", limit);
@@ -55,23 +54,7 @@ const getBinancePrice = async ({
     return result;
   }
 
-  while (askList[itemIndex] && amount < bitcoinAmount) {
-    const [askListItemPrice, askListItemAmount] = askList[itemIndex];
-    const askPrice = Number(askListItemPrice);
-    const askAmount = Number(askListItemAmount);
-    const shouldBuyWholeAskedAmount = amount + askAmount <= bitcoinAmount;
-
-    if (shouldBuyWholeAskedAmount) {
-      amount += askAmount;
-      totalPrice += askAmount * askPrice;
-    } else {
-      const missingAmount = bitcoinAmount - amount;
-      amount += missingAmount;
-      totalPrice += missingAmount * askPrice;
-    }
-
-    itemIndex++;
-  }
+  const [totalPrice, amount] = getOrderBookValues({ askList, bitcoinAmount });
 
   if (amount === bitcoinAmount) {
     result.USDAmount = totalPrice;

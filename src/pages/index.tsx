@@ -1,12 +1,12 @@
 import Head from "next/head";
 import React, { useEffect, useState } from "react";
-import getBinancePrice from "../binance-calculations";
+import getBinancePrice from "../../lib/binance-calculations";
 
 const Binance = () => {
   const [price, setPrice] = useState(null);
 
   useEffect(() => {
-    getBinancePrice({ bitcoinAmount: 4 }).then((price) => setPrice(price));
+    getBinancePrice({ bitcoinAmount: 2 }).then((price) => setPrice(price));
   }, []);
 
   return (
