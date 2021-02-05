@@ -2,6 +2,8 @@ import Head from "next/head";
 import React, { FC, useEffect, useState } from "react";
 import getBinancePrice from "../lib/binance-calculations";
 import { GetStaticProps } from "next";
+import debounce from "lodash.debounce";
+
 /**
  * SAMPLES
  * USDAmount: 149433.50352462003
@@ -9,22 +11,16 @@ import { GetStaticProps } from "next";
  * marketName: "Binance"
  */
 
-const fetchMarket = ({ bitcoinAmount, setMarket }) => {
+const fetchMarket = debounce(({ bitcoinAmount, setMarket }) => {
   fetch(`/api/binance-price?amount=${bitcoinAmount}`)
     .then((res) => res.json())
     .then((market) => setMarket(market));
-};
+}, 250);
 
 type SSG = { data };
 const Binance: FC<SSG> = ({ data }) => {
   const [market, setMarket] = useState(data);
   const [bitcoinAmount, setBitcoinAmount] = useState<string>("2");
-
-  useEffect(() => {
-    if (bitcoinAmount) {
-      fetchMarket({ bitcoinAmount, setMarket });
-    }
-  }, [bitcoinAmount]);
 
   return (
     <div>
@@ -35,12 +31,14 @@ const Binance: FC<SSG> = ({ data }) => {
         id="amount"
         value={bitcoinAmount}
         onChange={(event) => {
-          const value = event.target.value;
+          const { value } = event.target;
           setBitcoinAmount(value);
 
           if (!value) {
             setMarket(null);
           }
+
+          fetchMarket({ bitcoinAmount, setMarket });
         }}
       />
       <div>
