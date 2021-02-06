@@ -4,6 +4,7 @@ import { GetStaticProps } from "next";
 import debounce from "lodash.debounce";
 
 import getBinancePrice from "../lib/binance-calculations";
+import getCoinbasePrice from "../lib/coinbase-calculations";
 
 /**
  * SAMPLES
@@ -16,7 +17,7 @@ type SSG = { data };
 
 const fetchMarket = debounce(({ bitcoinAmount, setMarket, setIsLoading }) => {
   setIsLoading(true);
-  fetch(`/api/binance-price?amount=${bitcoinAmount || "0"}`)
+  fetch(`/api/best-market?amount=${bitcoinAmount || "0"}`)
     .then((res) => res.json())
     .then(setMarket)
     .then(() => setIsLoading(false));
@@ -53,7 +54,16 @@ const Binance: FC<SSG> = ({ data }) => {
 };
 
 export const getStaticProps: GetStaticProps<SSG> = async (context) => {
-  const data = await getBinancePrice({ bitcoinAmount: 2 });
+  const binanceData = await getBinancePrice({
+    bitcoinAmount: 2,
+  });
+
+  const coinbaseData = await getCoinbasePrice({
+    bitcoinAmount: 2,
+  });
+
+  const data =
+    binanceData.USDAmount > coinbaseData.USDAmount ? coinbaseData : binanceData;
 
   return {
     props: { data },
