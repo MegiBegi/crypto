@@ -1,8 +1,10 @@
+import React, { FC, useEffect, useState, useCallback } from "react";
 import Head from "next/head";
-import React, { FC, useEffect, useState } from "react";
-import getBinancePrice from "../lib/binance-calculations";
 import { GetStaticProps } from "next";
 import debounce from "lodash.debounce";
+
+import getBinancePrice from "../lib/binance-calculations";
+import { useConstant } from "../lib/hooks";
 
 /**
  * SAMPLES
@@ -11,16 +13,19 @@ import debounce from "lodash.debounce";
  * marketName: "Binance"
  */
 
-const fetchMarket = debounce(({ bitcoinAmount, setMarket }) => {
-  fetch(`/api/binance-price?amount=${bitcoinAmount}`)
-    .then((res) => res.json())
-    .then((market) => setMarket(market));
-}, 250);
-
 type SSG = { data };
+
 const Binance: FC<SSG> = ({ data }) => {
-  const [market, setMarket] = useState(data);
+  const [market, setMarket] = useState<typeof data | null>(data);
   const [bitcoinAmount, setBitcoinAmount] = useState<string>("2");
+
+  const fetchMarket = useConstant(() =>
+    debounce(({ bitcoinAmount }) => {
+      fetch(`/api/binance-price?amount=${bitcoinAmount || "0"}`)
+        .then((res) => res.json())
+        .then(setMarket);
+    }, 250)
+  );
 
   return (
     <div>
@@ -29,16 +34,14 @@ const Binance: FC<SSG> = ({ data }) => {
       <label htmlFor="amount">How many BTC do you wanna buy?</label>
       <input
         id="amount"
+        type="number"
         value={bitcoinAmount}
         onChange={(event) => {
           const { value } = event.target;
-          setBitcoinAmount(value);
+          let convertedValues = value;
 
-          if (!value) {
-            setMarket(null);
-          }
-
-          fetchMarket({ bitcoinAmount, setMarket });
+          setBitcoinAmount(convertedValues);
+          fetchMarket({ bitcoinAmount: convertedValues });
         }}
       />
       <div>
