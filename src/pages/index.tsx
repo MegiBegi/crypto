@@ -4,7 +4,6 @@ import { GetStaticProps } from "next";
 import debounce from "lodash.debounce";
 
 import getBinancePrice from "../lib/binance-calculations";
-import { useConstant } from "../lib/hooks";
 
 /**
  * SAMPLES
@@ -15,17 +14,18 @@ import { useConstant } from "../lib/hooks";
 
 type SSG = { data };
 
+const fetchMarket = debounce(({ bitcoinAmount, setMarket, setIsLoading }) => {
+  setIsLoading(true);
+  fetch(`/api/binance-price?amount=${bitcoinAmount || "0"}`)
+    .then((res) => res.json())
+    .then(setMarket)
+    .then(() => setIsLoading(false));
+}, 250);
+
 const Binance: FC<SSG> = ({ data }) => {
   const [market, setMarket] = useState<typeof data | null>(data);
   const [bitcoinAmount, setBitcoinAmount] = useState<string>("2");
-
-  const fetchMarket = useConstant(() =>
-    debounce(({ bitcoinAmount }) => {
-      fetch(`/api/binance-price?amount=${bitcoinAmount || "0"}`)
-        .then((res) => res.json())
-        .then(setMarket);
-    }, 250)
-  );
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <div>
@@ -38,16 +38,15 @@ const Binance: FC<SSG> = ({ data }) => {
         value={bitcoinAmount}
         onChange={(event) => {
           const { value } = event.target;
-          let convertedValues = value;
 
-          setBitcoinAmount(convertedValues);
-          fetchMarket({ bitcoinAmount: convertedValues });
+          setBitcoinAmount(value);
+          fetchMarket({ bitcoinAmount: value, setMarket, setIsLoading });
         }}
       />
       <div>
-        <h4>Market: {market?.marketName}</h4>
-        <h4>USD amount: {market?.USDAmount}</h4>
-        <h4>BTC amount: {market?.bitcoinAmount}</h4>
+        <h4>Market: {isLoading ? "Loading..." : market?.marketName}</h4>
+        <h4>USD amount: {isLoading ? "Loading..." : market?.USDAmount}</h4>
+        <h4>BTC amount: {isLoading ? "Loading..." : market?.bitcoinAmount}</h4>
       </div>
     </div>
   );
