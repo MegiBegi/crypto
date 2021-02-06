@@ -7,6 +7,23 @@ import getBinancePrice from "../lib/binance-calculations";
 import getCoinbasePrice from "../lib/coinbase-calculations";
 import getBitbayPrice from "../lib/bitbay-calculations";
 import { getMarketWithBestOffer } from "../lib/helpers";
+import {
+  NumberInput,
+  NumberInputField,
+  Badge,
+  Stat,
+  StatNumber,
+  StatLabel,
+  StatHelpText,
+  StatArrow,
+  Spinner,
+  Heading,
+  Box,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
+  Text,
+} from "@chakra-ui/react";
 
 /**
  * SAMPLES
@@ -30,35 +47,83 @@ const Binance: FC<SSG> = ({ data }) => {
   const [bitcoinAmount, setBitcoinAmount] = useState<string>("2");
   const [isLoading, setIsLoading] = useState(false);
 
-  return (
-    <div>
-      <Head>Binance!</Head>
-      <h1>Compare buying offers from Binance, Coinbase and Bitbay!</h1>
-      <label htmlFor="amount">How many BTC do you wanna buy?</label>
-      <input
-        id="amount"
-        type="number"
-        value={bitcoinAmount}
-        onChange={(event) => {
-          const { value } = event.target;
+  const format = (val) => `₿` + val;
+  const parse = (val) => val.replace(/^\$/, "");
 
-          setBitcoinAmount(value);
-          fetchMarket({ bitcoinAmount: value, setMarket, setIsLoading });
+  console.log(bitcoinAmount);
+
+  return (
+    <Box maxW="32rem" mt="48">
+      <Head>Crypto Kingdom!</Head>
+
+      <Heading as="h2" size="2xl" mb="4">
+        Compare buying offers from Binance, Coinbase and Bitbay!
+      </Heading>
+
+      <Heading as="h2" size="l">
+        How many BTC do you wanna buy?
+      </Heading>
+      <NumberInput
+        defaultValue={2}
+        placeholder="Enter amount"
+        w={250}
+        value={format(bitcoinAmount)}
+        onChange={(value) => {
+          const parsedValue = parse(value);
+
+          setBitcoinAmount(parsedValue);
+          fetchMarket({
+            bitcoinAmount: parsedValue,
+            setMarket,
+            setIsLoading,
+          });
         }}
-      />
-      <div>
-        <h4>Market: {isLoading ? "Loading..." : market?.marketName}</h4>
-        <h4>USD amount: {isLoading ? "Loading..." : market?.USDAmount}</h4>
-        <h4>BTC amount: {isLoading ? "Loading..." : market?.bitcoinAmount}</h4>
-        <h4>
-          {isLoading
-            ? "Loading..."
-            : market?.marketsWithErrors?.map((market) => (
-                <div>{market.error}</div>
-              ))}
-        </h4>
-      </div>
-    </div>
+      >
+        <NumberInputField />
+        <NumberInputStepper>
+          <NumberIncrementStepper />
+          <NumberDecrementStepper />
+        </NumberInputStepper>
+      </NumberInput>
+
+      <Heading as="h2" size="l" mt="4">
+        You should definitely go with
+      </Heading>
+      <Heading as="h2" size="xl" mb="4">
+        {isLoading ? <Spinner size="xs" /> : market?.marketName}
+      </Heading>
+      <Stat>
+        <StatLabel>USD</StatLabel>
+        <StatNumber>
+          {isLoading ? <Spinner size="xs" /> : `$ ${market?.USDAmount}`}
+        </StatNumber>
+        <StatHelpText>
+          <StatArrow type="increase" />
+          23.36%
+        </StatHelpText>
+      </Stat>
+
+      <Stat>
+        <StatLabel>BTC</StatLabel>
+        <StatNumber>
+          {isLoading ? <Spinner size="xs" /> : `₿ ${market?.bitcoinAmount}`}
+        </StatNumber>
+        <StatHelpText>Feb 12 - Feb 28</StatHelpText>
+      </Stat>
+
+      <h4>
+        {isLoading ? (
+          <Spinner size="xs" />
+        ) : (
+          market?.marketsWithErrors?.map((market) => (
+            <div>
+              <Badge colorScheme="red">Oops!</Badge>
+              {market.error}
+            </div>
+          ))
+        )}
+      </h4>
+    </Box>
   );
 };
 
