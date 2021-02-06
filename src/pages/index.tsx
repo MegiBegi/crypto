@@ -1,10 +1,12 @@
-import React, { FC, useEffect, useState, useCallback } from "react";
+import React, { FC, useState } from "react";
 import Head from "next/head";
 import { GetStaticProps } from "next";
 import debounce from "lodash.debounce";
 
 import getBinancePrice from "../lib/binance-calculations";
 import getCoinbasePrice from "../lib/coinbase-calculations";
+import getBitbayPrice from "../lib/bitbay-calculations";
+import { getMarketWithBestOffer } from "../lib/helpers";
 
 /**
  * SAMPLES
@@ -31,7 +33,7 @@ const Binance: FC<SSG> = ({ data }) => {
   return (
     <div>
       <Head>Binance!</Head>
-      <h1>Hooray!</h1>
+      <h1>Compare buying offers from Binance, Coinbase and Bitbay!</h1>
       <label htmlFor="amount">How many BTC do you wanna buy?</label>
       <input
         id="amount"
@@ -48,6 +50,13 @@ const Binance: FC<SSG> = ({ data }) => {
         <h4>Market: {isLoading ? "Loading..." : market?.marketName}</h4>
         <h4>USD amount: {isLoading ? "Loading..." : market?.USDAmount}</h4>
         <h4>BTC amount: {isLoading ? "Loading..." : market?.bitcoinAmount}</h4>
+        <h4>
+          {isLoading
+            ? "Loading..."
+            : market?.marketsWithErrors?.map((market) => (
+                <div>{market.error}</div>
+              ))}
+        </h4>
       </div>
     </div>
   );
@@ -62,11 +71,16 @@ export const getStaticProps: GetStaticProps<SSG> = async (context) => {
     bitcoinAmount: 2,
   });
 
-  const data =
-    binanceData.USDAmount > coinbaseData.USDAmount ? coinbaseData : binanceData;
+  const bitbayData = await getBitbayPrice({
+    bitcoinAmount: 2,
+  });
+
+  const market = getMarketWithBestOffer({
+    marketList: [binanceData, coinbaseData, bitbayData],
+  });
 
   return {
-    props: { data },
+    props: { data: market },
   };
 };
 

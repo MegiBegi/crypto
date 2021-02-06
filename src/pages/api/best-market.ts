@@ -3,6 +3,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import getBinancePrice from "../../lib/binance-calculations";
 import getCoinbasePrice from "../../lib/coinbase-calculations";
+import getBitbayPrice from "../../lib/bitbay-calculations";
+import { getMarketWithBestOffer } from "../../lib/helpers";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const binanceData = await getBinancePrice({
@@ -13,8 +15,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     bitcoinAmount: Number(req.query.amount),
   });
 
-  const market =
-    binanceData.USDAmount > coinbaseData.USDAmount ? coinbaseData : binanceData;
+  const bitbayData = await getBitbayPrice({
+    bitcoinAmount: Number(req.query.amount),
+  });
+
+  const market = getMarketWithBestOffer({
+    marketList: [binanceData, coinbaseData, bitbayData],
+  });
 
   res.status(200);
   res.json(market);

@@ -23,3 +23,14 @@ export const getOrderBookValues = ({ askList, bitcoinAmount }) => {
 
   return [totalPrice, amount];
 };
+
+export const getMarketWithBestOffer = ({ marketList }) => {
+  const marketWithOffers = marketList.filter((market) => !market.error);
+  const marketsWithErrors = marketList.filter((market) => market.error);
+
+  const sortedListByUSDAmount = marketWithOffers.sort(
+    (a, b) => a.USDAmount - b.USDAmount
+  );
+
+  return { ...sortedListByUSDAmount[0], marketsWithErrors };
+};

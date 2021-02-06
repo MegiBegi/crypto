@@ -39,7 +39,6 @@ const getBinancePrice = async ({
   retry?: number;
 }): Promise<Result> => {
   const limit = getLimit({ bitcoinAmount, retry });
-
   const url = new URL("https://api.binance.com/api/v3/depth");
   url.searchParams.set("limit", limit);
   url.searchParams.set("symbol", "BTCUSDT");
@@ -63,6 +62,7 @@ const getBinancePrice = async ({
 
   if (limit === MAX_LIMIT) {
     result.USDAmount = totalPrice;
+    result.bitcoinAmount = amount;
     result.error = `Sorry, offers at Binance are limited to BTC ${amount} currently being sold at the price of USD ${totalPrice}`;
     return result;
   }

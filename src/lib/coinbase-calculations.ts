@@ -1,7 +1,5 @@
 import { getOrderBookValues } from "./helpers";
 
-const MAX_LIMIT = "5000";
-
 /* SAMPLES
 {
     "sequence": "3",
@@ -26,13 +24,12 @@ type Result = {
 };
 const getCoinbasePrice = async ({
   bitcoinAmount,
-  retry = 0,
 }: {
   bitcoinAmount: number;
   retry?: number;
 }): Promise<any> => {
   const url = new URL("https://api.pro.coinbase.com/products/BTC-USD/book");
-  url.searchParams.set("level", "2");
+  url.searchParams.set("level", String(bitcoinAmount < 2 ? 2 : 3));
 
   const response = await fetch(String(url));
   const { asks: askList } = await response.json();
@@ -52,6 +49,7 @@ const getCoinbasePrice = async ({
 
   if (amount < bitcoinAmount) {
     result.USDAmount = totalPrice;
+    result.bitcoinAmount = amount;
     result.error = `Sorry, offers at Coinbase are limited to BTC ${amount} currently being sold at the price of USD ${totalPrice}`;
     return result;
   }
