@@ -1,5 +1,22 @@
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+
 function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />;
+  const colors = {
+    brand: {
+      900: "#1a365d",
+      800: "#153e75",
+      700: "#2a69ac",
+    },
+  };
+
+  const theme = extendTheme({ colors });
+  //    <ChakraProvider theme={theme}>
+
+  return (
+    <ChakraProvider>
+      <Component {...pageProps} />
+    </ChakraProvider>
+  );
 }
 
 // Only uncomment this method if you have blocking data requirements for
