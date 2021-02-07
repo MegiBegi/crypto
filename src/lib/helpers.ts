@@ -34,3 +34,14 @@ export const getMarketWithBestOffer = ({ marketList }) => {
 
   return { ...sortedListByUSDAmount[0], marketsWithErrors };
 };
+
+function thousandSeparate(number: number) {
+  return String(number).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+export function prettifyNumber(number: number, toFixed?: number) {
+  return thousandSeparate(Number(number?.toFixed(toFixed || 2))).replace(
+    ".",
+    ","
+  );
+}

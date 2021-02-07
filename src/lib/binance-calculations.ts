@@ -1,4 +1,4 @@
-import { getOrderBookValues } from "./helpers";
+import { getOrderBookValues, prettifyNumber } from "./helpers";
 
 const MAX_LIMIT = "5000";
 
@@ -63,7 +63,9 @@ const getBinancePrice = async ({
   if (limit === MAX_LIMIT) {
     result.USDAmount = totalPrice;
     result.bitcoinAmount = amount;
-    result.error = `Sorry, offers at Binance are limited to BTC ${amount} currently being sold at the price of USD ${totalPrice}`;
+    result.error = `Sorry, offers at Binance are limited to ₿${prettifyNumber(
+      amount
+    )} sold for $${prettifyNumber(totalPrice)}`;
     return result;
   }
 

@@ -1,4 +1,4 @@
-import { getOrderBookValues } from "./helpers";
+import { getOrderBookValues, prettifyNumber } from "./helpers";
 
 /* SAMPLES
 {
@@ -66,7 +66,9 @@ const getBitbayPrice = async ({
   if (amount < bitcoinAmount) {
     result.USDAmount = totalPrice;
     result.bitcoinAmount = amount;
-    result.error = `Sorry, offers at Bitbay are limited to BTC ${amount} currently being sold at the price of USD ${totalPrice}`;
+    result.error = `Sorry, offers at Bitbay are limited to ₿${prettifyNumber(
+      amount
+    )} sold for $${prettifyNumber(totalPrice)}`;
     return result;
   }
 };

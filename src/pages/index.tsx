@@ -6,7 +6,8 @@ import debounce from "lodash.debounce";
 import getBinancePrice from "../lib/binance-calculations";
 import getCoinbasePrice from "../lib/coinbase-calculations";
 import getBitbayPrice from "../lib/bitbay-calculations";
-import { getMarketWithBestOffer } from "../lib/helpers";
+import { getMarketWithBestOffer, prettifyNumber } from "../lib/helpers";
+import PrettyError from "../lib/PrettyError";
 import {
   NumberInput,
   NumberInputField,
@@ -22,7 +23,6 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
-  Text,
 } from "@chakra-ui/react";
 
 /**
@@ -49,8 +49,6 @@ const Binance: FC<SSG> = ({ data }) => {
 
   const format = (val) => `₿` + val;
   const parse = (val) => val.replace(/^\$/, "");
-
-  console.log(bitcoinAmount);
 
   return (
     <Box maxW="32rem" mt="48">
@@ -95,7 +93,11 @@ const Binance: FC<SSG> = ({ data }) => {
       <Stat>
         <StatLabel>USD</StatLabel>
         <StatNumber>
-          {isLoading ? <Spinner size="xs" /> : `$ ${market?.USDAmount}`}
+          {isLoading ? (
+            <Spinner size="xs" />
+          ) : (
+            `$ ${prettifyNumber(market?.USDAmount)}`
+          )}
         </StatNumber>
         <StatHelpText>
           <StatArrow type="increase" />
@@ -106,7 +108,11 @@ const Binance: FC<SSG> = ({ data }) => {
       <Stat>
         <StatLabel>BTC</StatLabel>
         <StatNumber>
-          {isLoading ? <Spinner size="xs" /> : `₿ ${market?.bitcoinAmount}`}
+          {isLoading ? (
+            <Spinner size="xs" />
+          ) : (
+            `₿ ${prettifyNumber(market?.bitcoinAmount)}`
+          )}
         </StatNumber>
         <StatHelpText>Feb 12 - Feb 28</StatHelpText>
       </Stat>
@@ -117,8 +123,7 @@ const Binance: FC<SSG> = ({ data }) => {
         ) : (
           market?.marketsWithErrors?.map((market) => (
             <div>
-              <Badge colorScheme="red">Oops!</Badge>
-              {market.error}
+              <PrettyError>{market.error}</PrettyError>
             </div>
           ))
         )}
