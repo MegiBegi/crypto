@@ -28,15 +28,15 @@ import {
 /**
  * SAMPLES
  * USDAmount: 149433.50352462003
- * bitcoinAmount: 4
+ * btcAmount: 4
  * marketName: "Binance"
  */
 
 type SSG = { data };
 
-const fetchMarket = debounce(({ bitcoinAmount, setMarket, setIsLoading }) => {
+const fetchMarket = debounce(({ btcAmount, setMarket, setIsLoading }) => {
   setIsLoading(true);
-  fetch(`/api/best-market?amount=${bitcoinAmount || "0"}`)
+  fetch(`/api/best-market?amount=${btcAmount || "0"}`)
     .then((res) => res.json())
     .then(setMarket)
     .then(() => setIsLoading(false));
@@ -44,7 +44,7 @@ const fetchMarket = debounce(({ bitcoinAmount, setMarket, setIsLoading }) => {
 
 const Binance: FC<SSG> = ({ data }) => {
   const [market, setMarket] = useState<typeof data | null>(data);
-  const [bitcoinAmount, setBitcoinAmount] = useState<string>("2");
+  const [btcAmount, setBitcoinAmount] = useState<string>("2");
   const [isLoading, setIsLoading] = useState(false);
 
   const format = (val) => `₿` + val;
@@ -65,13 +65,13 @@ const Binance: FC<SSG> = ({ data }) => {
         defaultValue={2}
         placeholder="Enter amount"
         w={250}
-        value={format(bitcoinAmount)}
+        value={format(btcAmount)}
         onChange={(value) => {
           const parsedValue = parse(value);
 
           setBitcoinAmount(parsedValue);
           fetchMarket({
-            bitcoinAmount: parsedValue,
+            btcAmount: parsedValue,
             setMarket,
             setIsLoading,
           });
@@ -111,7 +111,7 @@ const Binance: FC<SSG> = ({ data }) => {
           {isLoading ? (
             <Spinner size="xs" />
           ) : (
-            `₿ ${prettifyNumber(market?.bitcoinAmount)}`
+            `₿ ${prettifyNumber(market?.btcAmount)}`
           )}
         </StatNumber>
         <StatHelpText>Feb 12 - Feb 28</StatHelpText>
@@ -133,20 +133,21 @@ const Binance: FC<SSG> = ({ data }) => {
 };
 
 export const getStaticProps: GetStaticProps<SSG> = async (context) => {
-  const binanceData = await getBinancePrice({
-    bitcoinAmount: 2,
-  });
-
-  const coinbaseData = await getCoinbasePrice({
-    bitcoinAmount: 2,
-  });
-
-  const bitbayData = await getBitbayPrice({
-    bitcoinAmount: 2,
-  });
+  const btcAmount = 2;
+  const marketList = await Promise.all([
+    getBinancePrice({
+      btcAmount,
+    }),
+    getCoinbasePrice({
+      btcAmount,
+    }),
+    getBitbayPrice({
+      btcAmount,
+    }),
+  ]);
 
   const market = getMarketWithBestOffer({
-    marketList: [binanceData, coinbaseData, bitbayData],
+    marketList,
   });
 
   return {

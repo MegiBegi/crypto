@@ -7,20 +7,21 @@ import getBitbayPrice from "../../lib/bitbay-calculations";
 import { getMarketWithBestOffer } from "../../lib/helpers";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const binanceData = await getBinancePrice({
-    bitcoinAmount: Number(req.query.amount),
-  });
-
-  const coinbaseData = await getCoinbasePrice({
-    bitcoinAmount: Number(req.query.amount),
-  });
-
-  const bitbayData = await getBitbayPrice({
-    bitcoinAmount: Number(req.query.amount),
-  });
+  const btcAmount = Number(req.query.amount);
+  const marketList = await Promise.all([
+    getBinancePrice({
+      btcAmount,
+    }),
+    getCoinbasePrice({
+      btcAmount,
+    }),
+    getBitbayPrice({
+      btcAmount,
+    }),
+  ]);
 
   const market = getMarketWithBestOffer({
-    marketList: [binanceData, coinbaseData, bitbayData],
+    marketList,
   });
 
   res.status(200);

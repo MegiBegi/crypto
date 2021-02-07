@@ -1,4 +1,5 @@
 import { getOrderBookValues, prettifyNumber } from "./helpers";
+import { MarketName } from "./types";
 
 /* SAMPLES
 {
@@ -17,39 +18,39 @@ import { getOrderBookValues, prettifyNumber } from "./helpers";
 */
 
 type Result = {
-  marketName: string;
-  bitcoinAmount: number;
+  marketName: MarketName;
+  btcAmount: number;
   USDAmount?: number;
   error?: string;
 };
 const getCoinbasePrice = async ({
-  bitcoinAmount,
+  btcAmount,
 }: {
-  bitcoinAmount: number;
+  btcAmount: number;
   retry?: number;
 }): Promise<any> => {
   const url = new URL("https://api.pro.coinbase.com/products/BTC-USD/book");
-  url.searchParams.set("level", String(bitcoinAmount < 2 ? 2 : 3));
+  url.searchParams.set("level", String(btcAmount < 2 ? 2 : 3));
 
   const response = await fetch(String(url));
   const { asks: askList } = await response.json();
-  const result: Result = { marketName: "Coinbase", bitcoinAmount };
+  const result: Result = { marketName: MarketName.Coinbase, btcAmount };
 
   if (askList?.length === 0) {
     result.error = "Sorry, there is no data available for Binance atm.";
     return result;
   }
 
-  const [totalPrice, amount] = getOrderBookValues({ askList, bitcoinAmount });
+  const [totalPrice, amount] = getOrderBookValues({ askList, btcAmount });
 
-  if (amount === bitcoinAmount) {
+  if (amount === btcAmount) {
     result.USDAmount = totalPrice;
     return result;
   }
 
-  if (amount < bitcoinAmount) {
+  if (amount < btcAmount) {
     result.USDAmount = totalPrice;
-    result.bitcoinAmount = amount;
+    result.btcAmount = amount;
     result.error = `Sorry, offers at Coinbase are limited to ₿${prettifyNumber(
       amount
     )} sold for $${prettifyNumber(totalPrice)}`;
