@@ -1,5 +1,5 @@
 import { getOrderBookValues } from "./helpers";
-import { MarketName, Result } from "./types";
+import { MarketName, SingleMarketData } from "./types";
 
 /* SAMPLES
 {
@@ -31,24 +31,34 @@ const getBitbayPrice = async ({
   btcAmount,
 }: {
   btcAmount: number;
-}): Promise<Result> => {
+}): Promise<SingleMarketData> => {
   const url = new URL("https://api.bitbay.net/rest/trading/orderbook/BTC-USD");
 
   const response = await fetch(String(url));
-  const { sell: askList } = await response.json();
+  const offersList = await response.json();
+  const { sell: askList } = offersList;
+  const { buy: bidsList } = offersList;
 
   const askListNormalized = askList.map(({ ra, ca }) => [ra, ca]);
+  const bidListNormalized = bidsList.map(({ ra, ca }) => [ra, ca]);
 
-  const [totalPrice, amount] = getOrderBookValues({
-    askList: askListNormalized,
+  const [USDAsksAmount, btcAsksSum] = getOrderBookValues({
+    recordList: askListNormalized,
+    btcAmount,
+  });
+
+  const [USDBidsAmount, btcBidsSum] = getOrderBookValues({
+    recordList: bidListNormalized,
     btcAmount,
   });
 
   return {
     marketName: MarketName.Bitbay,
     btcAmount,
-    USDAmount: totalPrice,
-    btcAsksSum: amount,
+    USDBidsAmount,
+    USDAsksAmount,
+    btcAsksSum,
+    btcBidsSum,
   };
 };
 

@@ -1,51 +1,35 @@
-import { Result } from "./types";
+import { SingleMarketData } from "./types";
 
 export const getOrderBookValues = ({
-  askList,
+  recordList,
   btcAmount,
 }: {
-  askList: [string, string][];
+  recordList: [string, string][];
   btcAmount: number;
 }): [number, number] => {
   let itemIndex = 0;
-  let totalPrice = 0;
-  let amount = 0;
+  let USDAmount = 0;
+  let btcSum = 0;
 
-  while (askList[itemIndex] && amount < btcAmount) {
-    const [askListItemPrice, askListItemAmount] = askList[itemIndex];
-    const askPrice = Number(askListItemPrice);
-    const askAmount = Number(askListItemAmount);
-    const shouldBuyWholeAskedAmount = amount + askAmount <= btcAmount;
+  while (recordList[itemIndex] && btcSum < btcAmount) {
+    const [itemPrice, itemAmount] = recordList[itemIndex];
+    const askPrice = Number(itemPrice);
+    const askAmount = Number(itemAmount);
+    const shouldBuyWholeAskedAmount = btcSum + askAmount <= btcAmount;
 
     if (shouldBuyWholeAskedAmount) {
-      amount += askAmount;
-      totalPrice += askAmount * askPrice;
+      btcSum += askAmount;
+      USDAmount += askAmount * askPrice;
     } else {
-      const missingAmount = btcAmount - amount;
-      amount += missingAmount;
-      totalPrice += missingAmount * askPrice;
+      const missingAmount = btcAmount - btcSum;
+      btcSum += missingAmount;
+      USDAmount += missingAmount * askPrice;
     }
 
     itemIndex++;
   }
 
-  return [totalPrice, amount];
-};
-
-export const getMarketWithBestOffer = ({
-  marketList,
-}: {
-  marketList: Result[];
-}) => {
-  const marketWithOffers = marketList.filter(
-    (market) => market.btcAsksSum === market.btcAmount
-  );
-
-  const sortedListByUSDAmount = marketWithOffers.sort(
-    (a, b) => a.USDAmount - b.USDAmount
-  );
-
-  return { ...sortedListByUSDAmount[0] };
+  return [USDAmount, btcSum];
 };
 
 function thousandSeparate(number: number) {
@@ -62,18 +46,34 @@ export function prettifyNumber(number: number, toFixed?: number) {
 export const getErrors = ({
   marketList,
 }: {
-  marketList: Result[];
+  marketList: SingleMarketData[];
 }): string[] => {
   const errors = [];
-  const marketWithOutOffers = marketList.filter(
+  const marketAsksWithOutOffers = marketList.filter(
     (market) => market.btcAsksSum !== market.btcAmount
   );
 
-  marketWithOutOffers.forEach((market) => {
+  const marketBidsWithOutOffers = marketList.filter(
+    (market) => market.btcBidsSum !== market.btcAmount
+  );
+
+  marketAsksWithOutOffers.forEach((market) => {
     errors.push(
-      `Sorry, offers at ${market.marketName} are limited to ₿${prettifyNumber(
+      `Sorry, sell offers at ${
+        market.marketName
+      } are limited to ₿${prettifyNumber(
+        market.btcBidsSum
+      )} sold for $${prettifyNumber(market.USDBidsAmount)}`
+    );
+  });
+
+  marketBidsWithOutOffers.forEach((market) => {
+    errors.push(
+      `Sorry, buy offers at ${
+        market.marketName
+      } are limited to ₿${prettifyNumber(
         market.btcAsksSum
-      )} sold for $${prettifyNumber(market.USDAmount)}`
+      )} sold for $${prettifyNumber(market.USDAsksAmount)}`
     );
   });
 

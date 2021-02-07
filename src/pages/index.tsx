@@ -6,8 +6,8 @@ import debounce from "lodash.debounce";
 import getBinancePrice from "../lib/binance-calculations";
 import getCoinbasePrice from "../lib/coinbase-calculations";
 import getBitbayPrice from "../lib/bitbay-calculations";
-import { getMarketWithBestOffer, prettifyNumber } from "../lib/helpers";
-import { Result } from "../lib/types";
+import { prettifyNumber, getErrors } from "../lib/helpers";
+import { Results } from "../lib/types";
 import PrettyError from "../lib/PrettyError";
 import {
   NumberInput,
@@ -31,7 +31,7 @@ import {
  * marketName: "Binance"
  */
 
-type SSG = { data: Result };
+type SSG = { data: Results };
 
 const fetchMarket = debounce(({ btcAmount, setMarket, setIsLoading }) => {
   setIsLoading(true);
@@ -50,17 +50,85 @@ const Binance: FC<SSG> = ({ data }) => {
   const parse = (val) => val.replace(/^\$/, "");
 
   return (
-    <Box maxW="32rem" mt="48">
+    <Box maxW="32rem" mt="32">
       <Head>Crypto Kingdom!</Head>
 
       <Heading as="h2" size="2xl" mb="4">
         Compare buying offers from Binance, Coinbase and Bitbay!
       </Heading>
 
-      <Heading as="h2" size="l">
-        How many BTC do you wanna buy?
+      <Stat>
+        <StatLabel>BTC</StatLabel>
+        <StatNumber>
+          {isLoading ? (
+            <Spinner size="xs" />
+          ) : (
+            `₿ ${prettifyNumber(market?.btcAmount)}`
+          )}
+        </StatNumber>
+        <StatHelpText>Feb 12 - Feb 28</StatHelpText>
+      </Stat>
+
+      <Heading as="h2" size="l" mt="4">
+        The best market to buy is atm
       </Heading>
+      <Heading as="h2" size="xl" mb="4">
+        {isLoading ? <Spinner size="xs" /> : market?.asksBestMarketName}
+      </Heading>
+      <Stat>
+        <StatLabel>USD</StatLabel>
+        <StatNumber>
+          {isLoading ? (
+            <Spinner size="xs" />
+          ) : typeof market?.asksBestUSDAmount === "string" ? (
+            market?.asksBestUSDAmount
+          ) : (
+            `$ ${prettifyNumber(market?.asksBestUSDAmount)}`
+          )}
+        </StatNumber>
+        <StatHelpText>
+          <StatArrow type="increase" />
+          23.36%
+        </StatHelpText>
+      </Stat>
+
+      <Heading as="h2" size="l" mt="4">
+        The best market to sell is atm
+      </Heading>
+      <Heading as="h2" size="xl" mb="4">
+        {isLoading ? <Spinner size="xs" /> : market?.bidsBestMarketName}
+      </Heading>
+      <Stat>
+        <StatLabel>USD</StatLabel>
+        <StatNumber>
+          {isLoading ? (
+            <Spinner size="xs" />
+          ) : typeof market?.bidsBestUSDAmount === "string" ? (
+            market?.bidsBestUSDAmount
+          ) : (
+            `$ ${prettifyNumber(market?.bidsBestUSDAmount)}`
+          )}
+        </StatNumber>
+        <StatHelpText>
+          <StatArrow type="increase" />
+          23.36%
+        </StatHelpText>
+      </Stat>
+
+      <h4>
+        {isLoading ? (
+          <Spinner size="xs" />
+        ) : (
+          market?.errors?.map((error) => (
+            <div>
+              <PrettyError>{error}</PrettyError>
+            </div>
+          ))
+        )}
+      </h4>
+
       <NumberInput
+        display="block"
         defaultValue={2}
         placeholder="Enter amount"
         w={250}
@@ -82,51 +150,6 @@ const Binance: FC<SSG> = ({ data }) => {
           <NumberDecrementStepper />
         </NumberInputStepper>
       </NumberInput>
-
-      <Heading as="h2" size="l" mt="4">
-        You should definitely go with
-      </Heading>
-      <Heading as="h2" size="xl" mb="4">
-        {isLoading ? <Spinner size="xs" /> : market?.marketName}
-      </Heading>
-      <Stat>
-        <StatLabel>USD</StatLabel>
-        <StatNumber>
-          {isLoading ? (
-            <Spinner size="xs" />
-          ) : (
-            `$ ${prettifyNumber(market?.USDAmount)}`
-          )}
-        </StatNumber>
-        <StatHelpText>
-          <StatArrow type="increase" />
-          23.36%
-        </StatHelpText>
-      </Stat>
-
-      <Stat>
-        <StatLabel>BTC</StatLabel>
-        <StatNumber>
-          {isLoading ? (
-            <Spinner size="xs" />
-          ) : (
-            `₿ ${prettifyNumber(market?.btcAmount)}`
-          )}
-        </StatNumber>
-        <StatHelpText>Feb 12 - Feb 28</StatHelpText>
-      </Stat>
-
-      <h4>
-        {isLoading ? (
-          <Spinner size="xs" />
-        ) : (
-          market?.errors?.map((error) => (
-            <div>
-              <PrettyError>{error}</PrettyError>
-            </div>
-          ))
-        )}
-      </h4>
     </Box>
   );
 };
@@ -145,12 +168,36 @@ export const getStaticProps: GetStaticProps<SSG> = async (context) => {
     }),
   ]);
 
-  const market = getMarketWithBestOffer({
-    marketList,
-  });
+  const bidsOffers = marketList.filter(
+    ({ btcBidsSum }) => btcBidsSum === btcAmount
+  );
+  const asksOffers = marketList.filter(
+    ({ btcAsksSum }) => btcAsksSum === btcAmount
+  );
 
+  const sortedBidsListByUSDAmount = bidsOffers.sort(
+    (a, b) => a.USDBidsAmount - b.USDBidsAmount
+  );
+  const sortedAsksListByUSDAmount = asksOffers.sort(
+    (a, b) => a.USDAsksAmount - b.USDAsksAmount
+  );
+
+  const errors = getErrors({ marketList });
+
+  const marketData: Results = {
+    btcAmount,
+    errors,
+    bidsBestMarketName:
+      sortedBidsListByUSDAmount[0]?.marketName || "No results",
+    asksBestMarketName:
+      sortedAsksListByUSDAmount[0]?.marketName || "No results",
+    bidsBestUSDAmount:
+      sortedBidsListByUSDAmount[0]?.USDBidsAmount || "No results",
+    asksBestUSDAmount:
+      sortedAsksListByUSDAmount[0]?.USDAsksAmount || "No results",
+  };
   return {
-    props: { data: market },
+    props: { data: marketData },
   };
 };
 

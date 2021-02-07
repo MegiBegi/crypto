@@ -4,7 +4,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import getBinancePrice from "../../lib/binance-calculations";
 import getCoinbasePrice from "../../lib/coinbase-calculations";
 import getBitbayPrice from "../../lib/bitbay-calculations";
-import { getMarketWithBestOffer, getErrors } from "../../lib/helpers";
+import { getErrors } from "../../lib/helpers";
+import { MarketName } from "../../lib/types";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const btcAmount = Number(req.query.amount);
@@ -20,13 +21,43 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     }),
   ]);
 
-  const market = getMarketWithBestOffer({
-    marketList,
-  });
+  const bidsOffers = marketList.filter(
+    ({ btcBidsSum }) => btcBidsSum === btcAmount
+  );
+
+  const asksOffers = marketList.filter(
+    ({ btcAsksSum }) => btcAsksSum === btcAmount
+  );
+
+  const sortedBidsListByUSDAmount = bidsOffers.sort(
+    (a, b) => a.USDBidsAmount - b.USDBidsAmount
+  );
+
+  const sortedAsksListByUSDAmount = asksOffers.sort(
+    (a, b) => a.USDAsksAmount - b.USDAsksAmount
+  );
 
   const errors = getErrors({ marketList });
 
-  const marketData = { ...market, errors };
+  const marketData: {
+    btcAmount: number;
+    errors?: string[];
+    bidsBestMarketName: string;
+    asksBestMarketName: string;
+    bidsBestUSDAmount: number | string;
+    asksBestUSDAmount: number | string;
+  } = {
+    btcAmount,
+    errors,
+    bidsBestMarketName:
+      sortedBidsListByUSDAmount[0]?.marketName || "No results",
+    asksBestMarketName:
+      sortedAsksListByUSDAmount[0]?.marketName || "No results",
+    bidsBestUSDAmount:
+      sortedBidsListByUSDAmount[0]?.USDBidsAmount || "No results",
+    asksBestUSDAmount:
+      sortedAsksListByUSDAmount[0]?.USDAsksAmount || "No results",
+  };
 
   res.status(200);
   res.json(marketData);

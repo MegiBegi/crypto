@@ -1,5 +1,5 @@
 import { getOrderBookValues } from "./helpers";
-import { MarketName, Result } from "./types";
+import { MarketName, SingleMarketData } from "./types";
 
 const MAX_LIMIT = "5000";
 
@@ -32,28 +32,40 @@ const getBinancePrice = async ({
 }: {
   btcAmount: number;
   retry?: number;
-}): Promise<Result> => {
+}): Promise<SingleMarketData> => {
   const limit = getLimit({ btcAmount, retry });
   const url = new URL("https://api.binance.com/api/v3/depth");
   url.searchParams.set("limit", limit);
   url.searchParams.set("symbol", "BTCUSDT");
 
   const response = await fetch(String(url));
-  const { asks: askList } = await response.json();
+  const offersList = await response.json();
+  const { asks: askList } = offersList;
+  const { bids: bidsList } = offersList;
 
-  const [totalPrice, amount] = getOrderBookValues({ askList, btcAmount });
-
-  const result: Result = {
-    marketName: MarketName.Binance,
+  const [USDAsksAmount, btcAsksSum] = getOrderBookValues({
+    recordList: askList,
     btcAmount,
-    USDAmount: totalPrice,
-    btcAsksSum: amount,
-  };
+  });
 
-  if (askList.length === 0 || amount === btcAmount || limit === MAX_LIMIT) {
-    result.USDAmount = totalPrice;
-    result.btcAsksSum = amount;
-    return result;
+  const [USDBidsAmount, btcBidsSum] = getOrderBookValues({
+    recordList: bidsList,
+    btcAmount,
+  });
+
+  if (
+    askList.length === 0 ||
+    (USDAsksAmount && USDBidsAmount) === btcAmount ||
+    limit === MAX_LIMIT
+  ) {
+    return {
+      marketName: MarketName.Binance,
+      btcAmount,
+      USDBidsAmount,
+      USDAsksAmount,
+      btcAsksSum,
+      btcBidsSum,
+    };
   }
 
   return getBinancePrice({ btcAmount, retry: retry + 1 });

@@ -1,5 +1,5 @@
 import { getOrderBookValues } from "./helpers";
-import { MarketName, Result } from "./types";
+import { MarketName, SingleMarketData } from "./types";
 
 /* SAMPLES
 {
@@ -21,20 +21,32 @@ const getCoinbasePrice = async ({
   btcAmount,
 }: {
   btcAmount: number;
-}): Promise<any> => {
+}): Promise<SingleMarketData> => {
   const url = new URL("https://api.pro.coinbase.com/products/BTC-USD/book");
   url.searchParams.set("level", String(btcAmount < 2 ? 2 : 3));
 
   const response = await fetch(String(url));
-  const { asks: askList } = await response.json();
+  const offersList = await response.json();
+  const { asks: askList } = offersList;
+  const { bids: bidsList } = offersList;
 
-  const [totalPrice, amount] = getOrderBookValues({ askList, btcAmount });
+  const [USDAsksAmount, btcAsksSum] = getOrderBookValues({
+    recordList: askList,
+    btcAmount,
+  });
+
+  const [USDBidsAmount, btcBidsSum] = getOrderBookValues({
+    recordList: bidsList,
+    btcAmount,
+  });
 
   return {
     marketName: MarketName.Coinbase,
     btcAmount,
-    USDAmount: totalPrice,
-    btcAsksSum: amount,
+    USDBidsAmount,
+    USDAsksAmount,
+    btcAsksSum,
+    btcBidsSum,
   };
 };
 
