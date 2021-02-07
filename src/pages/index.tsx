@@ -2,6 +2,7 @@ import React, { FC, useState } from "react";
 import Head from "next/head";
 import { GetStaticProps } from "next";
 import debounce from "lodash.debounce";
+import { TimeIcon } from "@chakra-ui/icons";
 
 import getBinancePrice from "../lib/binance-calculations";
 import getCoinbasePrice from "../lib/coinbase-calculations";
@@ -49,8 +50,10 @@ const Binance: FC<SSG> = ({ data }) => {
   const format = (val) => `₿` + val;
   const parse = (val) => val.replace(/^\$/, "");
 
+  console.log(market?.date);
+
   return (
-    <Box maxW="32rem" mt="32">
+    <Box maxW="32rem" mt="32" mb="32">
       <Head>Crypto Kingdom!</Head>
 
       <Heading as="h2" size="2xl" mb="4">
@@ -127,6 +130,22 @@ const Binance: FC<SSG> = ({ data }) => {
         )}
       </h4>
 
+      <Heading as="h2" size="l" mt="4">
+        Last updated at
+      </Heading>
+      <Stat>
+        <StatNumber>
+          {isLoading ? (
+            <Spinner size="xs" />
+          ) : (
+            <>
+              <TimeIcon w={6} h={6} mr="2" />
+              {market?.date}
+            </>
+          )}
+        </StatNumber>
+      </Stat>
+
       <NumberInput
         mt="4"
         display="block"
@@ -156,6 +175,7 @@ const Binance: FC<SSG> = ({ data }) => {
 };
 
 export const getStaticProps: GetStaticProps<SSG> = async (context) => {
+  const date = new Date().toLocaleTimeString();
   const btcAmount = 2;
   const marketList = await Promise.all([
     getBinancePrice({
@@ -196,6 +216,7 @@ export const getStaticProps: GetStaticProps<SSG> = async (context) => {
       sortedBidsListByUSDAmount[0]?.USDBidsAmount || "No results",
     asksBestUSDAmount:
       sortedAsksListByUSDAmount[0]?.USDAsksAmount || "No results",
+    date,
   };
   return {
     props: { data: marketData },

@@ -16,7 +16,7 @@ function MyApp({ Component, pageProps }) {
     <ChakraProvider>
       <Box
         w="100%"
-        h="100vh"
+        minH="100vh"
         d="flex"
         justifyContent="center"
         bgGradient={[

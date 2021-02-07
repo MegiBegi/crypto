@@ -5,9 +5,9 @@ import getBinancePrice from "../../lib/binance-calculations";
 import getCoinbasePrice from "../../lib/coinbase-calculations";
 import getBitbayPrice from "../../lib/bitbay-calculations";
 import { getErrors } from "../../lib/helpers";
-import { MarketName } from "../../lib/types";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
+  const date = new Date().toLocaleTimeString();
   const btcAmount = Number(req.query.amount);
   const marketList = await Promise.all([
     getBinancePrice({
@@ -46,6 +46,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     asksBestMarketName: string;
     bidsBestUSDAmount: number | string;
     asksBestUSDAmount: number | string;
+    date: string;
   } = {
     btcAmount,
     errors,
@@ -57,6 +58,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       sortedBidsListByUSDAmount[0]?.USDBidsAmount || "No results",
     asksBestUSDAmount:
       sortedAsksListByUSDAmount[0]?.USDAsksAmount || "No results",
+    date,
   };
 
   res.status(200);

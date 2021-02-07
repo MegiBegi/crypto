@@ -21,4 +21,5 @@ export type Results = {
   asksBestMarketName: string;
   bidsBestUSDAmount: number | string;
   asksBestUSDAmount: number | string;
+  date: string;
 };
