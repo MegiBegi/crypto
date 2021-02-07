@@ -1,5 +1,5 @@
-import { getOrderBookValues, prettifyNumber } from "./helpers";
-import { MarketName } from "./types";
+import { getOrderBookValues } from "./helpers";
+import { MarketName, Result } from "./types";
 
 const MAX_LIMIT = "5000";
 
@@ -26,12 +26,6 @@ const getLimit = ({
   return levels[limitIndex + retry];
 };
 
-type Result = {
-  marketName: string;
-  btcAmount: number;
-  USDAmount?: number;
-  error?: string;
-};
 const getBinancePrice = async ({
   btcAmount,
   retry = 0,
@@ -47,26 +41,18 @@ const getBinancePrice = async ({
   const response = await fetch(String(url));
   const { asks: askList } = await response.json();
 
-  const result: Result = { marketName: MarketName.Binance, btcAmount };
-
-  if (askList?.length === 0) {
-    result.error = "Sorry, there is no data available for Binance atm.";
-    return result;
-  }
-
   const [totalPrice, amount] = getOrderBookValues({ askList, btcAmount });
 
-  if (amount === btcAmount) {
-    result.USDAmount = totalPrice;
-    return result;
-  }
+  const result: Result = {
+    marketName: MarketName.Binance,
+    btcAmount,
+    USDAmount: totalPrice,
+    btcAsksSum: amount,
+  };
 
-  if (limit === MAX_LIMIT) {
+  if (askList.length === 0 || amount === btcAmount || limit === MAX_LIMIT) {
     result.USDAmount = totalPrice;
-    result.btcAmount = amount;
-    result.error = `Sorry, offers at Binance are limited to ₿${prettifyNumber(
-      amount
-    )} sold for $${prettifyNumber(totalPrice)}`;
+    result.btcAsksSum = amount;
     return result;
   }
 

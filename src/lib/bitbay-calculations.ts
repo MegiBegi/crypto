@@ -1,5 +1,5 @@
-import { getOrderBookValues, prettifyNumber } from "./helpers";
-import { MarketName } from "./types";
+import { getOrderBookValues } from "./helpers";
+import { MarketName, Result } from "./types";
 
 /* SAMPLES
 {
@@ -27,30 +27,15 @@ import { MarketName } from "./types";
 }
 */
 
-type Result = {
-  marketName: string;
-  btcAmount: number;
-  USDAmount?: number;
-  error?: string;
-};
-
 const getBitbayPrice = async ({
   btcAmount,
-  retry = 0,
 }: {
   btcAmount: number;
-  retry?: number;
-}): Promise<any> => {
+}): Promise<Result> => {
   const url = new URL("https://api.bitbay.net/rest/trading/orderbook/BTC-USD");
 
   const response = await fetch(String(url));
   const { sell: askList } = await response.json();
-  const result: Result = { marketName: MarketName.Bitbay, btcAmount };
-
-  if (askList?.length === 0) {
-    result.error = "Sorry, there is no data available for Binance atm.";
-    return result;
-  }
 
   const askListNormalized = askList.map(({ ra, ca }) => [ra, ca]);
 
@@ -59,19 +44,12 @@ const getBitbayPrice = async ({
     btcAmount,
   });
 
-  if (amount === btcAmount) {
-    result.USDAmount = totalPrice;
-    return result;
-  }
-
-  if (amount < btcAmount) {
-    result.USDAmount = totalPrice;
-    result.btcAmount = amount;
-    result.error = `Sorry, offers at Bitbay are limited to ₿${prettifyNumber(
-      amount
-    )} sold for $${prettifyNumber(totalPrice)}`;
-    return result;
-  }
+  return {
+    marketName: MarketName.Bitbay,
+    btcAmount,
+    USDAmount: totalPrice,
+    btcAsksSum: amount,
+  };
 };
 
 export default getBitbayPrice;

@@ -1,4 +1,12 @@
-export const getOrderBookValues = ({ askList, btcAmount }) => {
+import { Result } from "./types";
+
+export const getOrderBookValues = ({
+  askList,
+  btcAmount,
+}: {
+  askList: [string, string][];
+  btcAmount: number;
+}): [number, number] => {
   let itemIndex = 0;
   let totalPrice = 0;
   let amount = 0;
@@ -24,15 +32,20 @@ export const getOrderBookValues = ({ askList, btcAmount }) => {
   return [totalPrice, amount];
 };
 
-export const getMarketWithBestOffer = ({ marketList }) => {
-  const marketWithOffers = marketList.filter((market) => !market.error);
-  const marketsWithErrors = marketList.filter((market) => market.error);
+export const getMarketWithBestOffer = ({
+  marketList,
+}: {
+  marketList: Result[];
+}) => {
+  const marketWithOffers = marketList.filter(
+    (market) => market.btcAsksSum === market.btcAmount
+  );
 
   const sortedListByUSDAmount = marketWithOffers.sort(
     (a, b) => a.USDAmount - b.USDAmount
   );
 
-  return { ...sortedListByUSDAmount[0], marketsWithErrors };
+  return { ...sortedListByUSDAmount[0] };
 };
 
 function thousandSeparate(number: number) {
@@ -45,3 +58,24 @@ export function prettifyNumber(number: number, toFixed?: number) {
     ","
   );
 }
+
+export const getErrors = ({
+  marketList,
+}: {
+  marketList: Result[];
+}): string[] => {
+  const errors = [];
+  const marketWithOutOffers = marketList.filter(
+    (market) => market.btcAsksSum !== market.btcAmount
+  );
+
+  marketWithOutOffers.forEach((market) => {
+    errors.push(
+      `Sorry, offers at ${market.marketName} are limited to ₿${prettifyNumber(
+        market.btcAsksSum
+      )} sold for $${prettifyNumber(market.USDAmount)}`
+    );
+  });
+
+  return errors;
+};

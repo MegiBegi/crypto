@@ -7,11 +7,11 @@ import getBinancePrice from "../lib/binance-calculations";
 import getCoinbasePrice from "../lib/coinbase-calculations";
 import getBitbayPrice from "../lib/bitbay-calculations";
 import { getMarketWithBestOffer, prettifyNumber } from "../lib/helpers";
+import { Result } from "../lib/types";
 import PrettyError from "../lib/PrettyError";
 import {
   NumberInput,
   NumberInputField,
-  Badge,
   Stat,
   StatNumber,
   StatLabel,
@@ -24,7 +24,6 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
 } from "@chakra-ui/react";
-
 /**
  * SAMPLES
  * USDAmount: 149433.50352462003
@@ -32,7 +31,7 @@ import {
  * marketName: "Binance"
  */
 
-type SSG = { data };
+type SSG = { data: Result };
 
 const fetchMarket = debounce(({ btcAmount, setMarket, setIsLoading }) => {
   setIsLoading(true);
@@ -121,9 +120,9 @@ const Binance: FC<SSG> = ({ data }) => {
         {isLoading ? (
           <Spinner size="xs" />
         ) : (
-          market?.marketsWithErrors?.map((market) => (
+          market?.errors?.map((error) => (
             <div>
-              <PrettyError>{market.error}</PrettyError>
+              <PrettyError>{error}</PrettyError>
             </div>
           ))
         )}
