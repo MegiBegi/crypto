@@ -128,6 +128,7 @@ const Binance: FC<SSG> = ({ data }) => {
       </h4>
 
       <NumberInput
+        mt="4"
         display="block"
         defaultValue={2}
         placeholder="Enter amount"

@@ -57,7 +57,7 @@ export const getErrors = ({
     (market) => market.btcBidsSum !== market.btcAmount
   );
 
-  marketAsksWithOutOffers.forEach((market) => {
+  marketBidsWithOutOffers.forEach((market) => {
     errors.push(
       `Sorry, sell offers at ${
         market.marketName
@@ -67,7 +67,7 @@ export const getErrors = ({
     );
   });
 
-  marketBidsWithOutOffers.forEach((market) => {
+  marketAsksWithOutOffers.forEach((market) => {
     errors.push(
       `Sorry, buy offers at ${
         market.marketName
