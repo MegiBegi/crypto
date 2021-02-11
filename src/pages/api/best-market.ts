@@ -8,7 +8,7 @@ import { getErrors } from "../../lib/helpers";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const date = new Date().toLocaleTimeString();
-  const btcAmount = Number(req.query.amount);
+  const btcAmount = Number(req.query.amount) || 0;
   const marketList = await Promise.all([
     getBinancePrice({
       btcAmount,

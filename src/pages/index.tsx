@@ -3,6 +3,7 @@ import Head from "next/head";
 import { GetStaticProps } from "next";
 import debounce from "lodash.debounce";
 import { TimeIcon } from "@chakra-ui/icons";
+import { useQuery } from "react-query";
 
 import getBinancePrice from "../lib/binance-calculations";
 import getCoinbasePrice from "../lib/coinbase-calculations";
@@ -25,6 +26,7 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
 } from "@chakra-ui/react";
+import { useConstant } from "../lib/hooks";
 /**
  * SAMPLES
  * USDAmount: 149433.50352462003
@@ -32,25 +34,28 @@ import {
  * marketName: "Binance"
  */
 
-type SSG = { data: Results };
+type SSG = { marketData: Results };
 
-const fetchMarket = debounce(({ btcAmount, setMarket, setIsLoading }) => {
-  setIsLoading(true);
-  fetch(`/api/best-market?amount=${btcAmount || "0"}`)
-    .then((res) => res.json())
-    .then(setMarket)
-    .then(() => setIsLoading(false));
-}, 250);
+const format = (val) => `₿` + val;
+const parse = (val) => val.replace(/^\$/, "");
 
-const Binance: FC<SSG> = ({ data }) => {
-  const [market, setMarket] = useState<typeof data | null>(data);
-  const [btcAmount, setBitcoinAmount] = useState<string>("2");
-  const [isLoading, setIsLoading] = useState(false);
+const Binance: FC<SSG> = (props) => {
+  const [btcAmount, setBTCAmount] = useState<string>("2");
 
-  const format = (val) => `₿` + val;
-  const parse = (val) => val.replace(/^\$/, "");
+  const { isLoading, error, data, isFetching } = useQuery<Results>(
+    ["bestMarket", btcAmount],
+    () =>
+      fetch(`/api/best-market?amount=${btcAmount}`).then((res) => res.json()),
+    {
+      refetchInterval: Number(btcAmount) > 5 ? 3000 : 1000,
+    }
+  );
 
-  console.log(market?.date);
+  const marketData = data || props.marketData;
+
+  const debouncedBTCAmount = useConstant(() =>
+    debounce((val: string) => setBTCAmount(val))
+  );
 
   return (
     <Box maxW="32rem" mt="32" mb="32">
@@ -66,7 +71,7 @@ const Binance: FC<SSG> = ({ data }) => {
           {isLoading ? (
             <Spinner size="xs" />
           ) : (
-            `₿ ${prettifyNumber(market?.btcAmount)}`
+            `₿ ${prettifyNumber(marketData.btcAmount)}`
           )}
         </StatNumber>
         <StatHelpText>Feb 12 - Feb 28</StatHelpText>
@@ -76,17 +81,17 @@ const Binance: FC<SSG> = ({ data }) => {
         The best market to buy is atm
       </Heading>
       <Heading as="h2" size="xl" mb="4">
-        {isLoading ? <Spinner size="xs" /> : market?.asksBestMarketName}
+        {isLoading ? <Spinner size="xs" /> : marketData.asksBestMarketName}
       </Heading>
       <Stat>
         <StatLabel>USD</StatLabel>
         <StatNumber>
           {isLoading ? (
             <Spinner size="xs" />
-          ) : typeof market?.asksBestUSDAmount === "string" ? (
-            market?.asksBestUSDAmount
+          ) : typeof marketData.asksBestUSDAmount === "string" ? (
+            marketData.asksBestUSDAmount
           ) : (
-            `$ ${prettifyNumber(market?.asksBestUSDAmount)}`
+            `$ ${prettifyNumber(marketData.asksBestUSDAmount)}`
           )}
         </StatNumber>
         <StatHelpText>
@@ -99,17 +104,17 @@ const Binance: FC<SSG> = ({ data }) => {
         The best market to sell is atm
       </Heading>
       <Heading as="h2" size="xl" mb="4">
-        {isLoading ? <Spinner size="xs" /> : market?.bidsBestMarketName}
+        {isLoading ? <Spinner size="xs" /> : marketData.bidsBestMarketName}
       </Heading>
       <Stat>
         <StatLabel>USD</StatLabel>
         <StatNumber>
           {isLoading ? (
             <Spinner size="xs" />
-          ) : typeof market?.bidsBestUSDAmount === "string" ? (
-            market?.bidsBestUSDAmount
+          ) : typeof marketData.bidsBestUSDAmount === "string" ? (
+            marketData.bidsBestUSDAmount
           ) : (
-            `$ ${prettifyNumber(market?.bidsBestUSDAmount)}`
+            `$ ${prettifyNumber(marketData.bidsBestUSDAmount)}`
           )}
         </StatNumber>
         <StatHelpText>
@@ -122,7 +127,7 @@ const Binance: FC<SSG> = ({ data }) => {
         {isLoading ? (
           <Spinner size="xs" />
         ) : (
-          market?.errors?.map((error) => (
+          marketData.errors?.map((error) => (
             <div>
               <PrettyError>{error}</PrettyError>
             </div>
@@ -140,7 +145,7 @@ const Binance: FC<SSG> = ({ data }) => {
           ) : (
             <>
               <TimeIcon w={6} h={6} mr="2" />
-              {market?.date}
+              {marketData.date}
             </>
           )}
         </StatNumber>
@@ -150,18 +155,12 @@ const Binance: FC<SSG> = ({ data }) => {
         mt="4"
         display="block"
         defaultValue={2}
+        min={0}
         placeholder="Enter amount"
         w={250}
         value={format(btcAmount)}
         onChange={(value) => {
-          const parsedValue = parse(value);
-
-          setBitcoinAmount(parsedValue);
-          fetchMarket({
-            btcAmount: parsedValue,
-            setMarket,
-            setIsLoading,
-          });
+          debouncedBTCAmount(value);
         }}
       >
         <NumberInputField />
@@ -219,7 +218,8 @@ export const getStaticProps: GetStaticProps<SSG> = async (context) => {
     date,
   };
   return {
-    props: { data: marketData },
+    props: { marketData },
+    revalidate: 5,
   };
 };
 

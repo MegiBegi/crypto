@@ -1,33 +1,30 @@
 import { ChakraProvider, extendTheme, Box } from "@chakra-ui/react";
+import { ReactQueryDevtools } from "react-query/devtools";
+
+import { QueryClient, QueryClientProvider } from "react-query";
 
 function MyApp({ Component, pageProps }) {
-  const colors = {
-    brand: {
-      900: "#1a365d",
-      800: "#153e75",
-      700: "#2a69ac",
-    },
-  };
-
-  const theme = extendTheme({ colors });
-  //    <ChakraProvider theme={theme}>
+  const queryClient = new QueryClient();
 
   return (
-    <ChakraProvider>
-      <Box
-        w="100%"
-        minH="100vh"
-        d="flex"
-        justifyContent="center"
-        bgGradient={[
-          "linear(to-tr, teal.300,yellow.400)",
-          "linear(to-t, blue.200, teal.500)",
-          "linear(to-b, orange.100, purple.300)",
-        ]}
-      >
-        <Component {...pageProps} />
-      </Box>
-    </ChakraProvider>
+    <QueryClientProvider client={queryClient}>
+      <ChakraProvider>
+        <Box
+          w="100%"
+          minH="100vh"
+          d="flex"
+          justifyContent="center"
+          bgGradient={[
+            "linear(to-tr, teal.300,yellow.400)",
+            "linear(to-t, blue.200, teal.500)",
+            "linear(to-b, orange.100, purple.300)",
+          ]}
+        >
+          <Component {...pageProps} />
+        </Box>
+      </ChakraProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 
