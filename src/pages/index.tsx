@@ -25,6 +25,8 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
+  InputLeftElement,
+  InputGroup,
 } from "@chakra-ui/react";
 import { useConstant } from "../lib/hooks";
 /**
@@ -36,12 +38,8 @@ import { useConstant } from "../lib/hooks";
 
 type SSG = { marketData: Results };
 
-const format = (val) => `₿` + val;
-const parse = (val) => val.replace(/^\$/, "");
-
 const Binance: FC<SSG> = (props) => {
   const [btcAmount, setBTCAmount] = useState<string>("2");
-
   const { isLoading, error, data, isFetching } = useQuery<Results>(
     ["bestMarket", btcAmount],
     () =>
@@ -54,7 +52,9 @@ const Binance: FC<SSG> = (props) => {
   const marketData = data || props.marketData;
 
   const debouncedBTCAmount = useConstant(() =>
-    debounce((val: string) => setBTCAmount(val))
+    debounce((val: string) => {
+      setBTCAmount(val);
+    }, 250)
   );
 
   return (
@@ -151,24 +151,33 @@ const Binance: FC<SSG> = (props) => {
         </StatNumber>
       </Stat>
 
-      <NumberInput
-        mt="4"
-        display="block"
-        defaultValue={2}
-        min={0}
-        placeholder="Enter amount"
-        w={250}
-        value={format(btcAmount)}
-        onChange={(value) => {
-          debouncedBTCAmount(value);
-        }}
-      >
-        <NumberInputField />
-        <NumberInputStepper>
-          <NumberIncrementStepper />
-          <NumberDecrementStepper />
-        </NumberInputStepper>
-      </NumberInput>
+      <InputGroup>
+        <InputLeftElement
+          pointerEvents="none"
+          color="black.500"
+          fontSize="1.2em"
+          children="₿"
+          top="16px"
+          left="-10px"
+        />
+        <NumberInput
+          mt="4"
+          display="block"
+          defaultValue={2}
+          min={0}
+          placeholder="Enter amount"
+          w={250}
+          onChange={(value) => {
+            debouncedBTCAmount(value);
+          }}
+        >
+          <NumberInputField />
+          <NumberInputStepper>
+            <NumberIncrementStepper />
+            <NumberDecrementStepper />
+          </NumberInputStepper>
+        </NumberInput>
+      </InputGroup>
     </Box>
   );
 };
