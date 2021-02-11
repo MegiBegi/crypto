@@ -71,7 +71,7 @@ const Binance: FC<SSG> = (props) => {
           {isLoading ? (
             <Spinner size="xs" />
           ) : (
-            `₿ ${prettifyNumber(marketData.btcAmount)}`
+            `₿ ${marketData.btcAmount.toLocaleString()}`
           )}
         </StatNumber>
         <StatHelpText>Feb 12 - Feb 28</StatHelpText>
@@ -91,7 +91,7 @@ const Binance: FC<SSG> = (props) => {
           ) : typeof marketData.asksBestUSDAmount === "string" ? (
             marketData.asksBestUSDAmount
           ) : (
-            `$ ${prettifyNumber(marketData.asksBestUSDAmount)}`
+            `$ ${marketData.asksBestUSDAmount.toLocaleString()}`
           )}
         </StatNumber>
         <StatHelpText>
@@ -114,7 +114,7 @@ const Binance: FC<SSG> = (props) => {
           ) : typeof marketData.bidsBestUSDAmount === "string" ? (
             marketData.bidsBestUSDAmount
           ) : (
-            `$ ${prettifyNumber(marketData.bidsBestUSDAmount)}`
+            `$ ${marketData.bidsBestUSDAmount.toLocaleString()}`
           )}
         </StatNumber>
         <StatHelpText>

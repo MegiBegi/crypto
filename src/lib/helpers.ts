@@ -32,17 +32,6 @@ export const getOrderBookValues = ({
   return [USDAmount, btcSum];
 };
 
-function thousandSeparate(number: number) {
-  return String(number).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-}
-
-export function prettifyNumber(number: number, toFixed?: number) {
-  return thousandSeparate(Number(number?.toFixed(toFixed || 2))).replace(
-    ".",
-    ","
-  );
-}
-
 export const getErrors = ({
   marketList,
 }: {
@@ -61,9 +50,7 @@ export const getErrors = ({
     errors.push(
       `Sorry, sell offers at ${
         market.marketName
-      } are limited to ₿${prettifyNumber(
-        market.btcBidsSum
-      )} sold for $${prettifyNumber(market.USDBidsAmount)}`
+      } are limited to ₿${market.btcBidsSum.toLocaleString()} sold for $${market.USDBidsAmount.toLocaleString()}`
     );
   });
 
@@ -71,9 +58,7 @@ export const getErrors = ({
     errors.push(
       `Sorry, buy offers at ${
         market.marketName
-      } are limited to ₿${prettifyNumber(
-        market.btcAsksSum
-      )} sold for $${prettifyNumber(market.USDAsksAmount)}`
+      } are limited to ₿${market.btcAsksSum.toLocaleString()} sold for $${market.USDAsksAmount.toLocaleString()}`
     );
   });
 
