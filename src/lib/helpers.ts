@@ -1,4 +1,4 @@
-import { SingleMarketData } from "./types";
+import { SingleMarketData, Results } from "./types";
 
 export const getOrderBookValues = ({
   recordList,
@@ -63,4 +63,44 @@ export const getErrors = ({
   });
 
   return errors;
+};
+
+export const getPriceDeltas = ({
+  marketDataPrev,
+  data,
+}: {
+  marketDataPrev: Results | undefined;
+  data: Results;
+}): { askPriceDelta: string | null; bidPriceDelta: string | null } => {
+  let askPriceDelta = null;
+  let bidPriceDelta = null;
+
+  if (!marketDataPrev || !data) return { askPriceDelta, bidPriceDelta };
+
+  if (
+    typeof marketDataPrev.asksBestUSDAmount === "number" ||
+    typeof data.asksBestUSDAmount === "number"
+  ) {
+    const askPriceDifference =
+      (data.asksBestUSDAmount as number) -
+      (marketDataPrev.asksBestUSDAmount as number);
+    askPriceDelta =
+      (askPriceDifference * 100) / (data.asksBestUSDAmount as number);
+  }
+
+  if (
+    typeof marketDataPrev.bidsBestUSDAmount === "number" ||
+    typeof data.bidsBestUSDAmount === "number"
+  ) {
+    const bidPriceDifference =
+      (data.bidsBestUSDAmount as number) -
+      (marketDataPrev.bidsBestUSDAmount as number);
+    bidPriceDelta =
+      (bidPriceDifference * 100) / (data.bidsBestUSDAmount as number);
+  }
+
+  return {
+    askPriceDelta: askPriceDelta.toFixed(3),
+    bidPriceDelta: bidPriceDelta.toFixed(3),
+  };
 };

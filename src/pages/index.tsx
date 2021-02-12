@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect } from "react";
 import Head from "next/head";
 import { GetStaticProps } from "next";
 import debounce from "lodash.debounce";
@@ -8,7 +8,7 @@ import { useQuery } from "react-query";
 import getBinancePrice from "../lib/binance-calculations";
 import getCoinbasePrice from "../lib/coinbase-calculations";
 import getBitbayPrice from "../lib/bitbay-calculations";
-import { prettifyNumber, getErrors } from "../lib/helpers";
+import { getErrors, getPriceDeltas } from "../lib/helpers";
 import { Results } from "../lib/types";
 import PrettyError from "../lib/PrettyError";
 import {
@@ -28,7 +28,8 @@ import {
   InputLeftElement,
   InputGroup,
 } from "@chakra-ui/react";
-import { useConstant } from "../lib/hooks";
+import { useConstant, usePrevious } from "../lib/hooks";
+
 /**
  * SAMPLES
  * USDAmount: 149433.50352462003
@@ -39,20 +40,36 @@ import { useConstant } from "../lib/hooks";
 type SSG = { marketData: Results };
 
 const Binance: FC<SSG> = (props) => {
-  const [btcAmount, setBTCAmount] = useState<string>("2");
+  const [btcAmount, setBTCAmount] = useState<number>(
+    props.marketData.btcAmount
+  );
+  const [{ askPriceDelta, bidPriceDelta }, setPriceDelta] = useState<{
+    askPriceDelta: string | null;
+    bidPriceDelta: string | null;
+  }>({
+    askPriceDelta: null,
+    bidPriceDelta: null,
+  });
+
   const { isLoading, error, data, isFetching } = useQuery<Results>(
     ["bestMarket", btcAmount],
     () =>
       fetch(`/api/best-market?amount=${btcAmount}`).then((res) => res.json()),
     {
-      refetchInterval: Number(btcAmount) > 5 ? 3000 : 1000,
+      refetchInterval: Number(btcAmount) > 5 ? 5000 : 2000,
     }
   );
+
+  const marketDataPrev = usePrevious(data);
+
+  useEffect(() => {
+    setPriceDelta(getPriceDeltas({ marketDataPrev, data }));
+  }, [data]);
 
   const marketData = data || props.marketData;
 
   const debouncedBTCAmount = useConstant(() =>
-    debounce((val: string) => {
+    debounce((val: number) => {
       setBTCAmount(val);
     }, 250)
   );
@@ -94,10 +111,14 @@ const Binance: FC<SSG> = (props) => {
             `$ ${marketData.asksBestUSDAmount.toLocaleString()}`
           )}
         </StatNumber>
-        <StatHelpText>
-          <StatArrow type="increase" />
-          23.36%
-        </StatHelpText>
+        {Number(askPriceDelta) !== 0 && (
+          <StatHelpText>
+            <StatArrow
+              type={Number(askPriceDelta) > 0 ? "increase" : "decrease"}
+            />
+            {askPriceDelta?.toLocaleString()}%
+          </StatHelpText>
+        )}
       </Stat>
 
       <Heading as="h2" size="l" mt="4">
@@ -117,10 +138,14 @@ const Binance: FC<SSG> = (props) => {
             `$ ${marketData.bidsBestUSDAmount.toLocaleString()}`
           )}
         </StatNumber>
-        <StatHelpText>
-          <StatArrow type="increase" />
-          23.36%
-        </StatHelpText>
+        {Number(bidPriceDelta) !== 0 && (
+          <StatHelpText>
+            <StatArrow
+              type={Number(bidPriceDelta) > 0 ? "increase" : "decrease"}
+            />
+            {bidPriceDelta?.toLocaleString()}%
+          </StatHelpText>
+        )}
       </Stat>
 
       <h4>
@@ -168,7 +193,7 @@ const Binance: FC<SSG> = (props) => {
           placeholder="Enter amount"
           w={250}
           onChange={(value) => {
-            debouncedBTCAmount(value);
+            debouncedBTCAmount(Number(value));
           }}
         >
           <NumberInputField />
