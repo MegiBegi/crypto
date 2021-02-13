@@ -7,7 +7,7 @@ import { useQuery } from "react-query";
 
 import { getPriceDeltas, getMarketData } from "../lib/helpers";
 import { Results } from "../lib/types";
-import PrettyError from "../lib/PrettyError";
+import PrettyError from "../lib/components/PrettyError";
 import {
   NumberInput,
   NumberInputField,

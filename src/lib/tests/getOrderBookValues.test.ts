@@ -1,4 +1,4 @@
-import { getOrderBookValues } from "./helpers";
+import { getOrderBookValues } from "../helpers";
 
 type SingularRecordPrice = string;
 type SingularRecordAmount = string;

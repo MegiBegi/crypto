@@ -1,7 +1,7 @@
 import { SingleMarketData, Results } from "./types";
-import getBinancePrice from "./binance-calculations";
-import getCoinbasePrice from "./coinbase-calculations";
-import getBitbayPrice from "./bitbay-calculations";
+import getBinancePrice from "./calculations/binance-calculations";
+import getCoinbasePrice from "./calculations/coinbase-calculations";
+import getBitbayPrice from "./calculations/bitbay-calculations";
 
 export const getOrderBookValues = ({
   recordList,

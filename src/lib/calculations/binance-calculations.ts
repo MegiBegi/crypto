@@ -1,5 +1,5 @@
-import { getOrderBookValues } from "./helpers";
-import { MarketName, SingleMarketData } from "./types";
+import { getOrderBookValues } from "../helpers";
+import { MarketName, SingleMarketData } from "../types";
 
 const MAX_LIMIT = "5000";
 
