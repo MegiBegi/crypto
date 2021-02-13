@@ -40,6 +40,7 @@ const Binance: FC<SSG> = (props) => {
   const [btcAmount, setBTCAmount] = useState<number>(
     props.marketData.btcAmount
   );
+
   const [{ askPriceDelta, bidPriceDelta }, setPriceDelta] = useState<{
     askPriceDelta: string | null;
     bidPriceDelta: string | null;
@@ -110,7 +111,7 @@ const Binance: FC<SSG> = (props) => {
             `$ ${marketData.asksBestUSDAmount.toLocaleString()}`
           )}
         </StatNumber>
-        {Number(askPriceDelta) !== 0 && (
+        {askPriceDelta && Number(askPriceDelta) !== 0 && (
           <StatHelpText>
             <StatArrow
               type={Number(askPriceDelta) > 0 ? "increase" : "decrease"}
@@ -137,7 +138,7 @@ const Binance: FC<SSG> = (props) => {
             `$ ${marketData.bidsBestUSDAmount.toLocaleString()}`
           )}
         </StatNumber>
-        {Number(bidPriceDelta) !== 0 && (
+        {bidPriceDelta && Number(bidPriceDelta) !== 0 && (
           <StatHelpText>
             <StatArrow
               type={Number(bidPriceDelta) > 0 ? "increase" : "decrease"}
