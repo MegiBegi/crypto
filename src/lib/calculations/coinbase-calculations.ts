@@ -29,6 +29,7 @@ const getCoinbasePrice = async ({
     const response = await fetch(String(url));
 
     const offersList = await response.json();
+
     const { asks: askList } = offersList;
     const { bids: bidsList } = offersList;
 

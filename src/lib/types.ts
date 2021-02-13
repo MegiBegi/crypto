@@ -24,3 +24,8 @@ export type Results = {
   asksBestUSDAmount: number | string;
   date: string;
 };
+
+export enum BestMarketResultsVariants {
+  Sell = "sell",
+  Buy = "buy",
+}

@@ -6,7 +6,7 @@ import { TimeIcon } from "@chakra-ui/icons";
 import { useQuery } from "react-query";
 
 import { getPriceDeltas, getMarketData } from "../lib/helpers";
-import { Results } from "../lib/types";
+import { Results, BestMarketResultsVariants } from "../lib/types";
 import PrettyError from "../lib/components/PrettyError";
 import {
   NumberInput,
@@ -15,7 +15,6 @@ import {
   StatNumber,
   StatLabel,
   StatHelpText,
-  StatArrow,
   Spinner,
   Heading,
   Box,
@@ -26,21 +25,12 @@ import {
   InputGroup,
 } from "@chakra-ui/react";
 import { useConstant, usePrevious } from "../lib/hooks";
-
-/**
- * SAMPLES
- * USDAmount: 149433.50352462003
- * btcAmount: 4
- * marketName: "Binance"
- */
+import BestMarketResults from "../lib/components/BestMarketResults";
+import Image from "next/image";
 
 type SSG = { marketData: Results };
 
 const Binance: FC<SSG> = (props) => {
-  const [btcAmount, setBTCAmount] = useState<number>(
-    props.marketData.btcAmount
-  );
-
   const [{ askPriceDelta, bidPriceDelta }, setPriceDelta] = useState<{
     askPriceDelta: string | null;
     bidPriceDelta: string | null;
@@ -48,6 +38,9 @@ const Binance: FC<SSG> = (props) => {
     askPriceDelta: null,
     bidPriceDelta: null,
   });
+  const [btcAmount, setBTCAmount] = useState<number>(
+    props.marketData.btcAmount
+  );
 
   const { isLoading, error, data } = useQuery<Results>(
     ["bestMarket", btcAmount],
@@ -91,62 +84,22 @@ const Binance: FC<SSG> = (props) => {
             `₿ ${marketData.btcAmount.toLocaleString()}`
           )}
         </StatNumber>
-        <StatHelpText>Feb 12 - Feb 28</StatHelpText>
       </Stat>
 
-      <Heading as="h2" size="l" mt="4">
-        The best market to buy is atm
-      </Heading>
-      <Heading as="h2" size="xl" mb="4">
-        {isLoading ? <Spinner size="xs" /> : marketData.asksBestMarketName}
-      </Heading>
-      <Stat>
-        <StatLabel>USD</StatLabel>
-        <StatNumber>
-          {isLoading ? (
-            <Spinner size="xs" />
-          ) : typeof marketData.asksBestUSDAmount === "string" ? (
-            marketData.asksBestUSDAmount
-          ) : (
-            `$ ${marketData.asksBestUSDAmount.toLocaleString()}`
-          )}
-        </StatNumber>
-        {askPriceDelta && Number(askPriceDelta) !== 0 && (
-          <StatHelpText>
-            <StatArrow
-              type={Number(askPriceDelta) > 0 ? "increase" : "decrease"}
-            />
-            {askPriceDelta?.toLocaleString()}%
-          </StatHelpText>
-        )}
-      </Stat>
-
-      <Heading as="h2" size="l" mt="4">
-        The best market to sell is atm
-      </Heading>
-      <Heading as="h2" size="xl" mb="4">
-        {isLoading ? <Spinner size="xs" /> : marketData.bidsBestMarketName}
-      </Heading>
-      <Stat>
-        <StatLabel>USD</StatLabel>
-        <StatNumber>
-          {isLoading ? (
-            <Spinner size="xs" />
-          ) : typeof marketData.bidsBestUSDAmount === "string" ? (
-            marketData.bidsBestUSDAmount
-          ) : (
-            `$ ${marketData.bidsBestUSDAmount.toLocaleString()}`
-          )}
-        </StatNumber>
-        {bidPriceDelta && Number(bidPriceDelta) !== 0 && (
-          <StatHelpText>
-            <StatArrow
-              type={Number(bidPriceDelta) > 0 ? "increase" : "decrease"}
-            />
-            {bidPriceDelta?.toLocaleString()}%
-          </StatHelpText>
-        )}
-      </Stat>
+      <BestMarketResults
+        variant={BestMarketResultsVariants.Buy}
+        isLoading={isLoading}
+        marketData={marketData}
+        askPriceDelta={askPriceDelta}
+        bidPriceDelta={bidPriceDelta}
+      />
+      <BestMarketResults
+        variant={BestMarketResultsVariants.Sell}
+        isLoading={isLoading}
+        marketData={marketData}
+        askPriceDelta={askPriceDelta}
+        bidPriceDelta={bidPriceDelta}
+      />
 
       <h4>
         {isLoading ? (
