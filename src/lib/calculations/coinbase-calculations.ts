@@ -22,7 +22,7 @@ const getCoinbasePrice = async ({
 }: {
   btcAmount: number;
 }): Promise<SingleMarketData> => {
-  const url = new URL("https://api.pro.coinbase.com/proucts/BTC-USD/book");
+  const url = new URL("https://api.pro.coinbase.com/products/BTC-USD/book");
   url.searchParams.set("level", String(btcAmount < 2 ? 2 : 3));
 
   try {

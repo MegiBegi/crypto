@@ -32,7 +32,7 @@ const getBitbayPrice = async ({
 }: {
   btcAmount: number;
 }): Promise<SingleMarketData> => {
-  const url = new URL("https://api.bitbay.net/rest/trading/orderook/BTC-USD");
+  const url = new URL("https://api.bitbay.net/rest/trading/orderbook/BTC-USD");
 
   try {
     const response = await fetch(String(url));

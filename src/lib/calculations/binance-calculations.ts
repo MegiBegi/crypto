@@ -34,7 +34,7 @@ const getBinancePrice = async ({
   retry?: number;
 }): Promise<SingleMarketData> => {
   const limit = getLimit({ btcAmount, retry });
-  const url = new URL("https://api.binance.com/api/v3/dpth");
+  const url = new URL("https://api.binance.com/api/v3/depth");
   url.searchParams.set("limit", limit);
   url.searchParams.set("symbol", "BTCUSDT");
 
