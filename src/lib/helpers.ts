@@ -1,4 +1,7 @@
 import { SingleMarketData, Results } from "./types";
+import getBinancePrice from "./binance-calculations";
+import getCoinbasePrice from "./coinbase-calculations";
+import getBitbayPrice from "./bitbay-calculations";
 
 export const getOrderBookValues = ({
   recordList,
@@ -100,7 +103,69 @@ export const getPriceDeltas = ({
   }
 
   return {
-    askPriceDelta: askPriceDelta.toFixed(3),
-    bidPriceDelta: bidPriceDelta.toFixed(3),
+    askPriceDelta: askPriceDelta?.toFixed(3),
+    bidPriceDelta: bidPriceDelta?.toFixed(3),
   };
+};
+
+export const getMarketData = async ({
+  btcAmount,
+}: {
+  btcAmount: number;
+}): Promise<{
+  btcAmount: number;
+  errors?: string[];
+  bidsBestMarketName: string;
+  asksBestMarketName: string;
+  bidsBestUSDAmount: number | string;
+  asksBestUSDAmount: number | string;
+  date: string;
+}> => {
+  const date = new Date().toLocaleTimeString();
+
+  const marketList = await Promise.all([
+    getBinancePrice({
+      btcAmount,
+    }),
+    getCoinbasePrice({
+      btcAmount,
+    }),
+    getBitbayPrice({
+      btcAmount,
+    }),
+  ]);
+
+  const bidsOffers = marketList.filter(
+    ({ btcBidsSum }) => btcBidsSum === btcAmount
+  );
+
+  const asksOffers = marketList.filter(
+    ({ btcAsksSum }) => btcAsksSum === btcAmount
+  );
+
+  const sortedBidsListByUSDAmount = bidsOffers.sort(
+    (a, b) => a.USDBidsAmount - b.USDBidsAmount
+  );
+
+  const sortedAsksListByUSDAmount = asksOffers.sort(
+    (a, b) => a.USDAsksAmount - b.USDAsksAmount
+  );
+
+  const errors = getErrors({ marketList });
+
+  const marketData = {
+    btcAmount,
+    errors,
+    bidsBestMarketName:
+      sortedBidsListByUSDAmount[0]?.marketName || "No results",
+    asksBestMarketName:
+      sortedAsksListByUSDAmount[0]?.marketName || "No results",
+    bidsBestUSDAmount:
+      sortedBidsListByUSDAmount[0]?.USDBidsAmount || "No results",
+    asksBestUSDAmount:
+      sortedAsksListByUSDAmount[0]?.USDAsksAmount || "No results",
+    date,
+  };
+
+  return marketData;
 };

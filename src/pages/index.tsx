@@ -5,10 +5,7 @@ import debounce from "lodash.debounce";
 import { TimeIcon } from "@chakra-ui/icons";
 import { useQuery } from "react-query";
 
-import getBinancePrice from "../lib/binance-calculations";
-import getCoinbasePrice from "../lib/coinbase-calculations";
-import getBitbayPrice from "../lib/bitbay-calculations";
-import { getErrors, getPriceDeltas } from "../lib/helpers";
+import { getPriceDeltas, getMarketData } from "../lib/helpers";
 import { Results } from "../lib/types";
 import PrettyError from "../lib/PrettyError";
 import {
@@ -208,49 +205,9 @@ const Binance: FC<SSG> = (props) => {
 };
 
 export const getStaticProps: GetStaticProps<SSG> = async (context) => {
-  const date = new Date().toLocaleTimeString();
   const btcAmount = 2;
-  const marketList = await Promise.all([
-    getBinancePrice({
-      btcAmount,
-    }),
-    getCoinbasePrice({
-      btcAmount,
-    }),
-    getBitbayPrice({
-      btcAmount,
-    }),
-  ]);
+  const marketData = await getMarketData({ btcAmount });
 
-  const bidsOffers = marketList.filter(
-    ({ btcBidsSum }) => btcBidsSum === btcAmount
-  );
-  const asksOffers = marketList.filter(
-    ({ btcAsksSum }) => btcAsksSum === btcAmount
-  );
-
-  const sortedBidsListByUSDAmount = bidsOffers.sort(
-    (a, b) => a.USDBidsAmount - b.USDBidsAmount
-  );
-  const sortedAsksListByUSDAmount = asksOffers.sort(
-    (a, b) => a.USDAsksAmount - b.USDAsksAmount
-  );
-
-  const errors = getErrors({ marketList });
-
-  const marketData: Results = {
-    btcAmount,
-    errors,
-    bidsBestMarketName:
-      sortedBidsListByUSDAmount[0]?.marketName || "No results",
-    asksBestMarketName:
-      sortedAsksListByUSDAmount[0]?.marketName || "No results",
-    bidsBestUSDAmount:
-      sortedBidsListByUSDAmount[0]?.USDBidsAmount || "No results",
-    asksBestUSDAmount:
-      sortedAsksListByUSDAmount[0]?.USDAsksAmount || "No results",
-    date,
-  };
   return {
     props: { marketData },
     revalidate: 5,
