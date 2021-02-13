@@ -42,14 +42,21 @@ export const getErrors = ({
 }): string[] => {
   const errors = [];
   const marketAsksWithOutOffers = marketList.filter(
-    (market) => market.btcAsksSum !== market.btcAmount
+    (market) => !market || market.btcAsksSum !== market.btcAmount
   );
 
   const marketBidsWithOutOffers = marketList.filter(
-    (market) => market.btcBidsSum !== market.btcAmount
+    (market) => !market || market.btcBidsSum !== market.btcAmount
   );
 
   marketBidsWithOutOffers.forEach((market) => {
+    if (market.error) {
+      errors.push(
+        `Sorry, sell offers at ${market.marketName} are currently unavailable`
+      );
+      return;
+    }
+
     errors.push(
       `Sorry, sell offers at ${
         market.marketName
@@ -58,6 +65,13 @@ export const getErrors = ({
   });
 
   marketAsksWithOutOffers.forEach((market) => {
+    if (market.error) {
+      errors.push(
+        `Sorry, buy offers at ${market.marketName} are currently unavailable`
+      );
+      return;
+    }
+
     errors.push(
       `Sorry, buy offers at ${
         market.marketName
@@ -112,15 +126,7 @@ export const getMarketData = async ({
   btcAmount,
 }: {
   btcAmount: number;
-}): Promise<{
-  btcAmount: number;
-  errors?: string[];
-  bidsBestMarketName: string;
-  asksBestMarketName: string;
-  bidsBestUSDAmount: number | string;
-  asksBestUSDAmount: number | string;
-  date: string;
-}> => {
+}): Promise<Results> => {
   const date = new Date().toLocaleTimeString();
 
   const marketList = await Promise.all([
@@ -135,11 +141,13 @@ export const getMarketData = async ({
     }),
   ]);
 
-  const bidsOffers = marketList.filter(
+  const marketListFiltered = marketList.filter((market) => !market.error);
+
+  const bidsOffers = marketListFiltered.filter(
     ({ btcBidsSum }) => btcBidsSum === btcAmount
   );
 
-  const asksOffers = marketList.filter(
+  const asksOffers = marketListFiltered.filter(
     ({ btcAsksSum }) => btcAsksSum === btcAmount
   );
 

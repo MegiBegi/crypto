@@ -12,6 +12,7 @@ export type SingleMarketData = {
   USDAsksAmount: number;
   btcAsksSum: number;
   btcBidsSum: number;
+  error?: string;
 };
 
 export type Results = {

@@ -48,7 +48,7 @@ const Binance: FC<SSG> = (props) => {
     bidPriceDelta: null,
   });
 
-  const { isLoading, error, data, isFetching } = useQuery<Results>(
+  const { isLoading, error, data } = useQuery<Results>(
     ["bestMarket", btcAmount],
     () =>
       fetch(`/api/best-market?amount=${btcAmount}`).then((res) => res.json()),
@@ -70,6 +70,8 @@ const Binance: FC<SSG> = (props) => {
       setBTCAmount(val);
     }, 250)
   );
+
+  if (error) return <h1>{`An error has occurred: ${error}`}</h1>;
 
   return (
     <Box maxW="32rem" mt="32" mb="32">
@@ -149,8 +151,8 @@ const Binance: FC<SSG> = (props) => {
         {isLoading ? (
           <Spinner size="xs" />
         ) : (
-          marketData.errors?.map((error) => (
-            <div>
+          marketData.errors?.map((error, index) => (
+            <div key={index}>
               <PrettyError>{error}</PrettyError>
             </div>
           ))

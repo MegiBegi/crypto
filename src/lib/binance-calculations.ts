@@ -34,41 +34,54 @@ const getBinancePrice = async ({
   retry?: number;
 }): Promise<SingleMarketData> => {
   const limit = getLimit({ btcAmount, retry });
-  const url = new URL("https://api.binance.com/api/v3/depth");
+  const url = new URL("https://api.binance.com/api/v3/dpth");
   url.searchParams.set("limit", limit);
   url.searchParams.set("symbol", "BTCUSDT");
 
-  const response = await fetch(String(url));
-  const offersList = await response.json();
-  const { asks: askList } = offersList;
-  const { bids: bidsList } = offersList;
+  try {
+    const response = await fetch(String(url));
 
-  const [USDAsksAmount, btcAsksSum] = getOrderBookValues({
-    recordList: askList,
-    btcAmount,
-  });
+    const offersList = await response.json();
+    const { asks: askList } = offersList;
+    const { bids: bidsList } = offersList;
 
-  const [USDBidsAmount, btcBidsSum] = getOrderBookValues({
-    recordList: bidsList,
-    btcAmount,
-  });
+    const [USDAsksAmount, btcAsksSum] = getOrderBookValues({
+      recordList: askList,
+      btcAmount,
+    });
 
-  if (
-    askList.length === 0 ||
-    (USDAsksAmount && USDBidsAmount) === btcAmount ||
-    limit === MAX_LIMIT
-  ) {
+    const [USDBidsAmount, btcBidsSum] = getOrderBookValues({
+      recordList: bidsList,
+      btcAmount,
+    });
+
+    if (
+      askList.length === 0 ||
+      (USDAsksAmount && USDBidsAmount) === btcAmount ||
+      limit === MAX_LIMIT
+    ) {
+      return {
+        marketName: MarketName.Binance,
+        btcAmount,
+        USDBidsAmount,
+        USDAsksAmount,
+        btcAsksSum,
+        btcBidsSum,
+      };
+    }
+
+    return getBinancePrice({ btcAmount, retry: retry + 1 });
+  } catch ({ message }) {
     return {
       marketName: MarketName.Binance,
       btcAmount,
-      USDBidsAmount,
-      USDAsksAmount,
-      btcAsksSum,
-      btcBidsSum,
+      USDBidsAmount: null,
+      USDAsksAmount: null,
+      btcAsksSum: null,
+      btcBidsSum: null,
+      error: message,
     };
   }
-
-  return getBinancePrice({ btcAmount, retry: retry + 1 });
 };
 
 export default getBinancePrice;

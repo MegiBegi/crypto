@@ -22,32 +22,45 @@ const getCoinbasePrice = async ({
 }: {
   btcAmount: number;
 }): Promise<SingleMarketData> => {
-  const url = new URL("https://api.pro.coinbase.com/products/BTC-USD/book");
+  const url = new URL("https://api.pro.coinbase.com/proucts/BTC-USD/book");
   url.searchParams.set("level", String(btcAmount < 2 ? 2 : 3));
 
-  const response = await fetch(String(url));
-  const offersList = await response.json();
-  const { asks: askList } = offersList;
-  const { bids: bidsList } = offersList;
+  try {
+    const response = await fetch(String(url));
 
-  const [USDAsksAmount, btcAsksSum] = getOrderBookValues({
-    recordList: askList,
-    btcAmount,
-  });
+    const offersList = await response.json();
+    const { asks: askList } = offersList;
+    const { bids: bidsList } = offersList;
 
-  const [USDBidsAmount, btcBidsSum] = getOrderBookValues({
-    recordList: bidsList,
-    btcAmount,
-  });
+    const [USDAsksAmount, btcAsksSum] = getOrderBookValues({
+      recordList: askList,
+      btcAmount,
+    });
 
-  return {
-    marketName: MarketName.Coinbase,
-    btcAmount,
-    USDBidsAmount,
-    USDAsksAmount,
-    btcAsksSum,
-    btcBidsSum,
-  };
+    const [USDBidsAmount, btcBidsSum] = getOrderBookValues({
+      recordList: bidsList,
+      btcAmount,
+    });
+
+    return {
+      marketName: MarketName.Coinbase,
+      btcAmount,
+      USDBidsAmount,
+      USDAsksAmount,
+      btcAsksSum,
+      btcBidsSum,
+    };
+  } catch ({ message }) {
+    return {
+      marketName: MarketName.Coinbase,
+      btcAmount,
+      USDBidsAmount: 0,
+      USDAsksAmount: 0,
+      btcAsksSum: 0,
+      btcBidsSum: 0,
+      error: message,
+    };
+  }
 };
 
 export default getCoinbasePrice;
