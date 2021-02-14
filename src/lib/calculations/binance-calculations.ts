@@ -57,7 +57,7 @@ const getBinancePrice = async ({
 
     if (
       askList.length === 0 ||
-      (USDAsksAmount && USDBidsAmount) === btcAmount ||
+      (btcAsksSum === btcAmount && btcBidsSum === btcAmount) ||
       limit === MAX_LIMIT
     ) {
       return {
