@@ -5,7 +5,8 @@ import debounce from "lodash.debounce";
 import { TimeIcon } from "@chakra-ui/icons";
 import { useQuery } from "react-query";
 
-import { getPriceDeltas, getMarketData } from "../lib/helpers";
+import { getPriceDeltas } from "../lib/helpers";
+import { getMarketData, fetchMarkets } from "../lib/marketData";
 import { Results, BestMarketResultsVariants } from "../lib/types";
 import PrettyError from "../lib/components/PrettyError";
 import {
@@ -14,7 +15,6 @@ import {
   Stat,
   StatNumber,
   StatLabel,
-  StatHelpText,
   Spinner,
   Heading,
   Box,
@@ -26,7 +26,6 @@ import {
 } from "@chakra-ui/react";
 import { useConstant, usePrevious } from "../lib/hooks";
 import BestMarketResults from "../lib/components/BestMarketResults";
-import Image from "next/image";
 
 type SSG = { marketData: Results };
 
@@ -162,7 +161,8 @@ const Binance: FC<SSG> = (props) => {
 
 export const getStaticProps: GetStaticProps<SSG> = async (context) => {
   const btcAmount = 2;
-  const marketData = await getMarketData({ btcAmount });
+  const marketList = await fetchMarkets(btcAmount);
+  const marketData = getMarketData({ btcAmount, marketList });
 
   return {
     props: { marketData },

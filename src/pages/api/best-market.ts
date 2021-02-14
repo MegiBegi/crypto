@@ -1,11 +1,12 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { getMarketData } from "../../lib/helpers";
+import { fetchMarkets, getMarketData } from "../../lib/marketData";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const btcAmount = Number(req.query.amount) || 0;
-  const marketData = await getMarketData({ btcAmount });
+  const marketList = await fetchMarkets(btcAmount);
+  const marketData = getMarketData({ btcAmount, marketList });
 
   if (!marketData) {
     res.status(500);
