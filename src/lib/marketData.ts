@@ -73,7 +73,6 @@ export const getMarketData = ({
   marketList: SingleMarketData[];
 }): Results | null => {
   const date = new Date().toLocaleTimeString();
-
   const marketListFiltered = marketList.filter((market) => market.data);
 
   if (!marketListFiltered.length) return null;
