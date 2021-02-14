@@ -45,20 +45,18 @@ const getCoinbasePrice = async ({
 
     return {
       marketName: MarketName.Coinbase,
-      btcAmount,
-      USDBidsAmount,
-      USDAsksAmount,
-      btcAsksSum,
-      btcBidsSum,
+      data: { btcAmount, USDBidsAmount, USDAsksAmount, btcAsksSum, btcBidsSum },
     };
   } catch ({ message }) {
     return {
       marketName: MarketName.Coinbase,
-      btcAmount,
-      USDBidsAmount: 0,
-      USDAsksAmount: 0,
-      btcAsksSum: 0,
-      btcBidsSum: 0,
+      data: {
+        btcAmount,
+        USDBidsAmount: 0,
+        USDAsksAmount: 0,
+        btcAsksSum: 0,
+        btcBidsSum: 0,
+      },
       error: message,
     };
   }

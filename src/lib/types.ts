@@ -6,13 +6,15 @@ export enum MarketName {
 
 export type SingleMarketData = {
   marketName: MarketName;
-  btcAmount: number;
-  errors?: string[];
-  USDBidsAmount: number;
-  USDAsksAmount: number;
-  btcAsksSum: number;
-  btcBidsSum: number;
   error?: string;
+  data: {
+    btcAmount: number;
+    errors?: string[];
+    USDBidsAmount: number;
+    USDAsksAmount: number;
+    btcAsksSum: number;
+    btcBidsSum: number;
+  } | null;
 };
 
 export type Results = {

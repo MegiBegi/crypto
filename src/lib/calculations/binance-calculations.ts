@@ -62,11 +62,13 @@ const getBinancePrice = async ({
     ) {
       return {
         marketName: MarketName.Binance,
-        btcAmount,
-        USDBidsAmount,
-        USDAsksAmount,
-        btcAsksSum,
-        btcBidsSum,
+        data: {
+          btcAmount,
+          USDBidsAmount,
+          USDAsksAmount,
+          btcAsksSum,
+          btcBidsSum,
+        },
       };
     }
 
@@ -74,12 +76,8 @@ const getBinancePrice = async ({
   } catch ({ message }) {
     return {
       marketName: MarketName.Binance,
-      btcAmount,
-      USDBidsAmount: null,
-      USDAsksAmount: null,
-      btcAsksSum: null,
-      btcBidsSum: null,
       error: message,
+      data: null,
     };
   }
 };

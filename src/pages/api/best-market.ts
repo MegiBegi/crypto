@@ -4,18 +4,17 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { fetchMarkets, getMarketData } from "../../lib/marketData";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const btcAmount = Number(req.query.amount) || 0;
-  const marketList = await fetchMarkets(btcAmount);
-  const marketData = getMarketData({ btcAmount, marketList });
+  try {
+    const btcAmount = Number(req.query.amount) || 0;
+    const marketList = await fetchMarkets(btcAmount);
+    const marketData = getMarketData({ btcAmount, marketList });
 
-  if (!marketData) {
+    if (!marketData) throw new Error("no data available");
+
+    res.status(200);
+    res.json(marketData);
+  } catch (err) {
     res.status(500);
-    res.end();
-
-    throw new Error();
+    res.json({ status: 500, message: err.message });
   }
-
-  res.status(200);
-  res.json(marketData);
-  res.end();
 };

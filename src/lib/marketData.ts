@@ -11,11 +11,11 @@ const getErrors = ({
 }): string[] => {
   const errors = [];
   const marketAsksWithOutOffers = marketList.filter(
-    (market) => !market || market.btcAsksSum !== market.btcAmount
+    (market) => !market || market.data.btcAsksSum !== market.data.btcAmount
   );
 
   const marketBidsWithOutOffers = marketList.filter(
-    (market) => !market || market.btcBidsSum !== market.btcAmount
+    (market) => !market || market.data.btcBidsSum !== market.data.btcAmount
   );
 
   marketBidsWithOutOffers.forEach((market) => {
@@ -29,7 +29,7 @@ const getErrors = ({
     errors.push(
       `Sorry, sell offers at ${
         market.marketName
-      } are limited to ₿${market.btcBidsSum.toLocaleString()} sold for $${market.USDBidsAmount.toLocaleString()}`
+      } are limited to ₿${market.data.btcBidsSum.toLocaleString()} sold for $${market.data.USDBidsAmount.toLocaleString()}`
     );
   });
 
@@ -44,7 +44,7 @@ const getErrors = ({
     errors.push(
       `Sorry, buy offers at ${
         market.marketName
-      } are limited to ₿${market.btcAsksSum.toLocaleString()} sold for $${market.USDAsksAmount.toLocaleString()}`
+      } are limited to ₿${market.data.btcAsksSum.toLocaleString()} sold for $${market.data.USDAsksAmount.toLocaleString()}`
     );
   });
 
@@ -74,22 +74,23 @@ export const getMarketData = ({
 }): Results => {
   const date = new Date().toLocaleTimeString();
 
-  const marketListFiltered = marketList.filter((market) => !market.error);
+  const marketListFiltered = marketList.filter((market) => market.data);
+  //if (!marketListFiltered.length) return null;
 
   const bidsOffers = marketListFiltered.filter(
-    ({ btcBidsSum }) => btcBidsSum === btcAmount
+    ({ data: { btcBidsSum } }) => btcBidsSum === btcAmount
   );
 
   const asksOffers = marketListFiltered.filter(
-    ({ btcAsksSum }) => btcAsksSum === btcAmount
+    ({ data: { btcAsksSum } }) => btcAsksSum === btcAmount
   );
 
   const sortedBidsListByUSDAmount = bidsOffers.sort(
-    (a, b) => b.USDBidsAmount - a.USDBidsAmount
+    (a, b) => b.data.USDBidsAmount - a.data.USDBidsAmount
   );
 
   const sortedAsksListByUSDAmount = asksOffers.sort(
-    (a, b) => a.USDAsksAmount - b.USDAsksAmount
+    (a, b) => a.data.USDAsksAmount - b.data.USDAsksAmount
   );
 
   const errors = getErrors({ marketList });
@@ -102,9 +103,9 @@ export const getMarketData = ({
     asksBestMarketName:
       sortedAsksListByUSDAmount[0]?.marketName || "No results",
     bidsBestUSDAmount:
-      sortedBidsListByUSDAmount[0]?.USDBidsAmount || "No results",
+      sortedBidsListByUSDAmount[0]?.data.USDBidsAmount || "No results",
     asksBestUSDAmount:
-      sortedAsksListByUSDAmount[0]?.USDAsksAmount || "No results",
+      sortedAsksListByUSDAmount[0]?.data.USDAsksAmount || "No results",
     date,
   };
 

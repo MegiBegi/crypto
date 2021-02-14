@@ -32,20 +32,18 @@ const getBitbayPrice = async ({
 
     return {
       marketName: MarketName.Bitbay,
-      btcAmount,
-      USDBidsAmount,
-      USDAsksAmount,
-      btcAsksSum,
-      btcBidsSum,
+      data: { btcAmount, USDBidsAmount, USDAsksAmount, btcAsksSum, btcBidsSum },
     };
   } catch ({ message }) {
     return {
       marketName: MarketName.Bitbay,
-      btcAmount,
-      USDBidsAmount: 0,
-      USDAsksAmount: 0,
-      btcAsksSum: 0,
-      btcBidsSum: 0,
+      data: {
+        btcAmount,
+        USDBidsAmount: 0,
+        USDAsksAmount: 0,
+        btcAsksSum: 0,
+        btcBidsSum: 0,
+      },
       error: message,
     };
   }
