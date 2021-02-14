@@ -164,6 +164,8 @@ export const getStaticProps: GetStaticProps<SSG> = async (context) => {
   const marketList = await fetchMarkets(btcAmount);
   const marketData = getMarketData({ btcAmount, marketList });
 
+  if (!marketData) throw new Error("No data available atm");
+
   return {
     props: { marketData },
     revalidate: 5,

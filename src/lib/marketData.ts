@@ -71,11 +71,12 @@ export const getMarketData = ({
 }: {
   btcAmount: number;
   marketList: SingleMarketData[];
-}): Results => {
+}): Results | null => {
   const date = new Date().toLocaleTimeString();
 
   const marketListFiltered = marketList.filter((market) => market.data);
-  //if (!marketListFiltered.length) return null;
+
+  if (!marketListFiltered.length) return null;
 
   const bidsOffers = marketListFiltered.filter(
     ({ data: { btcBidsSum } }) => btcBidsSum === btcAmount
