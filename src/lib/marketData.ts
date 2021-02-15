@@ -102,10 +102,8 @@ export const getMarketData = ({
       sortedBidsListByUSDAmount[0]?.marketName || "No results",
     asksBestMarketName:
       sortedAsksListByUSDAmount[0]?.marketName || "No results",
-    bidsBestUSDAmount:
-      sortedBidsListByUSDAmount[0]?.data.USDBidsAmount || "No results",
-    asksBestUSDAmount:
-      sortedAsksListByUSDAmount[0]?.data.USDAsksAmount || "No results",
+    bidsBestUSDAmount: sortedBidsListByUSDAmount[0]?.data.USDBidsAmount || null,
+    asksBestUSDAmount: sortedAsksListByUSDAmount[0]?.data.USDAsksAmount || null,
     date,
   };
 

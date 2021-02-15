@@ -44,8 +44,8 @@ const BestMarketResults: FC<{
         <StatNumber>
           {isLoading ? (
             <Spinner size="xs" />
-          ) : typeof bestUSDAmount === "string" ? (
-            bestUSDAmount
+          ) : !bestUSDAmount ? (
+            "No results"
           ) : (
             `$ ${bestUSDAmount?.toLocaleString()}`
           )}

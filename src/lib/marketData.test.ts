@@ -109,7 +109,7 @@ describe("getMarketData", () => {
       asksBestMarketName: "No results",
       bidsBestMarketName: MarketName.Coinbase,
       bidsBestUSDAmount: 150000,
-      asksBestUSDAmount: "No results",
+      asksBestUSDAmount: null,
       date: "10:10:31",
     };
 

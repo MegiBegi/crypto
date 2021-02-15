@@ -22,8 +22,8 @@ export type Results = {
   errors?: string[];
   bidsBestMarketName: string;
   asksBestMarketName: string;
-  bidsBestUSDAmount: number | string;
-  asksBestUSDAmount: number | string;
+  bidsBestUSDAmount: number;
+  asksBestUSDAmount: number;
   date: string;
 };
 
