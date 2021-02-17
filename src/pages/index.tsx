@@ -1,62 +1,51 @@
-import React, { FC, useState, useEffect } from "react";
-import Head from "next/head";
+import React, { FC, useState } from "react";
 import { GetStaticProps } from "next";
 import debounce from "lodash.debounce";
-import { TimeIcon } from "@chakra-ui/icons";
-import { useQuery } from "react-query";
+import { gql, useQuery } from "@apollo/client";
 
-import { getPriceDeltas } from "../lib/helpers";
 import { getMarketData, fetchMarkets } from "../lib/marketData";
-import { Results, BestMarketResultsVariants } from "../lib/types";
-import PrettyError from "../lib/components/PrettyError";
+import { Results } from "../lib/types";
+import BestMarketContent from "../lib/components/BestMarketContent";
+
 import {
   NumberInput,
   NumberInputField,
-  Stat,
-  StatNumber,
-  StatLabel,
-  Spinner,
-  Heading,
-  Box,
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
   InputLeftElement,
   InputGroup,
 } from "@chakra-ui/react";
-import { useConstant, usePrevious } from "../lib/hooks";
-import BestMarketResults from "../lib/components/BestMarketResults";
+import { useConstant } from "../lib/hooks";
 
 type SSG = { marketData: Results };
 
-const Binance: FC<SSG> = (props) => {
-  const [{ askPriceDelta, bidPriceDelta }, setPriceDelta] = useState<{
-    askPriceDelta: string | null;
-    bidPriceDelta: string | null;
-  }>({
-    askPriceDelta: null,
-    bidPriceDelta: null,
-  });
+const btcMarketDataQuery = gql`
+  query($btcAmount: Float!) {
+    bestMarket(btcAmount: $btcAmount) {
+      btcAmount
+      errors
+      bidsBestMarketName
+      asksBestMarketName
+      bidsBestUSDAmount
+      asksBestUSDAmount
+      date
+    }
+  }
+`;
+
+const BestMarket: FC<SSG> = (props) => {
   const [btcAmount, setBTCAmount] = useState<number>(
     props.marketData.btcAmount
   );
 
-  const { isLoading, error, data } = useQuery<Results>(
-    ["bestMarket", btcAmount],
-    () =>
-      fetch(`/api/best-market?amount=${btcAmount}`).then((res) => res.json()),
+  const { loading, error, data = { bestMarket: props.marketData } } = useQuery(
+    btcMarketDataQuery,
     {
-      refetchInterval: Number(btcAmount) > 5 ? 5000 : 2000,
+      variables: { btcAmount },
+      pollInterval: btcAmount > 5 ? 3000 : 1000,
     }
   );
-
-  const marketDataPrev = usePrevious(data);
-
-  useEffect(() => {
-    setPriceDelta(getPriceDeltas({ marketDataPrev, data }));
-  }, [data]);
-
-  const marketData = data || props.marketData;
 
   const debouncedBTCAmount = useConstant(() =>
     debounce((val: number) => {
@@ -67,67 +56,7 @@ const Binance: FC<SSG> = (props) => {
   if (error) return <h1>{`An error has occurred: ${error}`}</h1>;
 
   return (
-    <Box maxW="32rem" mt="32" mb="32">
-      <Head>Crypto Kingdom!</Head>
-
-      <Heading as="h2" size="2xl" mb="4">
-        Compare buying offers from Binance, Coinbase and Bitbay!
-      </Heading>
-
-      <Stat>
-        <StatLabel>BTC</StatLabel>
-        <StatNumber>
-          {isLoading ? (
-            <Spinner size="xs" />
-          ) : (
-            `₿ ${marketData.btcAmount.toLocaleString()}`
-          )}
-        </StatNumber>
-      </Stat>
-
-      <BestMarketResults
-        variant={BestMarketResultsVariants.Buy}
-        isLoading={isLoading}
-        marketData={marketData}
-        askPriceDelta={askPriceDelta}
-        bidPriceDelta={bidPriceDelta}
-      />
-      <BestMarketResults
-        variant={BestMarketResultsVariants.Sell}
-        isLoading={isLoading}
-        marketData={marketData}
-        askPriceDelta={askPriceDelta}
-        bidPriceDelta={bidPriceDelta}
-      />
-
-      <h4>
-        {isLoading ? (
-          <Spinner size="xs" />
-        ) : (
-          marketData.errors?.map((error, index) => (
-            <div key={index}>
-              <PrettyError>{error}</PrettyError>
-            </div>
-          ))
-        )}
-      </h4>
-
-      <Heading as="h2" size="l" mt="4">
-        Last updated at
-      </Heading>
-      <Stat>
-        <StatNumber>
-          {isLoading ? (
-            <Spinner size="xs" />
-          ) : (
-            <>
-              <TimeIcon w={6} h={6} mr="2" />
-              {marketData.date}
-            </>
-          )}
-        </StatNumber>
-      </Stat>
-
+    <BestMarketContent isLoading={loading} marketData={data?.bestMarket}>
       <InputGroup>
         <InputLeftElement
           pointerEvents="none"
@@ -155,7 +84,7 @@ const Binance: FC<SSG> = (props) => {
           </NumberInputStepper>
         </NumberInput>
       </InputGroup>
-    </Box>
+    </BestMarketContent>
   );
 };
 
@@ -172,4 +101,4 @@ export const getStaticProps: GetStaticProps<SSG> = async (context) => {
   };
 };
 
-export default Binance;
+export default BestMarket;

@@ -1,37 +1,29 @@
 import { ChakraProvider, Box } from "@chakra-ui/react";
-import { ReactQueryDevtools } from "react-query/devtools";
 
-import { QueryClient, QueryClientProvider } from "react-query";
-import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
+import { ApolloProvider } from "@apollo/client";
+
+import getGqlClient from "../lib/GhqClient";
 
 function MyApp({ Component, pageProps }) {
-  const queryClient = new QueryClient();
-
-  const client = new ApolloClient({
-    uri: pageProps.graphqlEndpoint,
-    cache: new InMemoryCache(),
-  });
+  const client = getGqlClient();
 
   return (
     <ApolloProvider client={client}>
-      <QueryClientProvider client={queryClient}>
-        <ChakraProvider>
-          <Box
-            w="100%"
-            minH="100vh"
-            d="flex"
-            justifyContent="center"
-            bgGradient={[
-              "linear(to-tr, teal.300,yellow.400)",
-              "linear(to-t, blue.200, teal.500)",
-              "linear(to-b, orange.100, purple.300)",
-            ]}
-          >
-            <Component {...pageProps} />
-          </Box>
-        </ChakraProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
+      <ChakraProvider>
+        <Box
+          w="100%"
+          minH="100vh"
+          d="flex"
+          justifyContent="center"
+          bgGradient={[
+            "linear(to-tr, teal.300,yellow.400)",
+            "linear(to-t, blue.200, teal.500)",
+            "linear(to-b, orange.100, purple.300)",
+          ]}
+        >
+          <Component {...pageProps} />
+        </Box>
+      </ChakraProvider>
     </ApolloProvider>
   );
 }
