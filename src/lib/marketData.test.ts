@@ -1,5 +1,6 @@
 import { getMarketData } from "./marketData";
-import { MarketName, SingleMarketData, Results } from "./types";
+import { MarketName, SingleMarketData } from "./types";
+import { BestMarket } from "../generated/types";
 
 describe("getMarketData", () => {
   beforeAll(() => {
@@ -45,7 +46,7 @@ describe("getMarketData", () => {
       },
     ];
 
-    const marketDataMock: Results = {
+    const marketDataMock: BestMarket = {
       btcAmount: 2,
       errors: [],
       bidsBestMarketName: MarketName.Binance,
@@ -97,7 +98,7 @@ describe("getMarketData", () => {
       },
     ];
 
-    const marketDataMock: Results = {
+    const marketDataMock: BestMarket = {
       btcAmount: 200,
       errors: [
         "Sorry, sell offers at Bitbay are limited to ₿120 sold for $40,000",

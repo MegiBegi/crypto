@@ -5,7 +5,6 @@ import { gql, useQuery } from "@apollo/client";
 import { Box, useColorMode, IconButton } from "@chakra-ui/react";
 
 import { getMarketData, fetchMarkets } from "../lib/marketData";
-import { Results } from "../lib/types";
 import BestMarketContent from "../lib/components/BestMarketContent";
 import { SunIcon, MoonIcon } from "@chakra-ui/icons";
 
@@ -19,8 +18,9 @@ import {
   InputGroup,
 } from "@chakra-ui/react";
 import { useConstant } from "../lib/hooks";
+import { BestMarket } from "../generated/types";
 
-type SSG = { marketData: Results };
+type SSG = { marketData: BestMarket };
 
 const btcMarketDataQuery = gql`
   query($btcAmount: Float!) {
@@ -36,7 +36,7 @@ const btcMarketDataQuery = gql`
   }
 `;
 
-const BestMarket: FC<SSG> = (props) => {
+const BestMarketData: FC<SSG> = (props) => {
   const [btcAmount, setBTCAmount] = useState<number>(
     props.marketData.btcAmount
   );
@@ -128,4 +128,4 @@ export const getStaticProps: GetStaticProps<SSG> = async (context) => {
   };
 };
 
-export default BestMarket;
+export default BestMarketData;

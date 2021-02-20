@@ -1,4 +1,4 @@
-import { Results } from "./types";
+import { BestMarket } from "../generated/types";
 
 export const getOrderBookValues = ({
   recordList,
@@ -36,8 +36,8 @@ export const getPriceDeltas = ({
   marketDataPrev,
   data,
 }: {
-  marketDataPrev: Results | undefined;
-  data: Results;
+  marketDataPrev: BestMarket | undefined;
+  data: BestMarket;
 }): { askPriceDelta: string | null; bidPriceDelta: string | null } => {
   let askPriceDelta = null;
   let bidPriceDelta = null;

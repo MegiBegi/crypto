@@ -3,7 +3,7 @@ import Head from "next/head";
 import { TimeIcon } from "@chakra-ui/icons";
 
 import { getPriceDeltas } from "../helpers";
-import { Results, BestMarketResultsVariants } from "../types";
+import { BestMarketResultsVariants } from "../types";
 import PrettyError from "../components/PrettyError";
 import {
   Stat,
@@ -15,10 +15,11 @@ import {
 } from "@chakra-ui/react";
 import { usePrevious } from "../hooks";
 import BestMarketResults from "../components/BestMarketResults";
+import { BestMarket } from "../../generated/types";
 
 const BestMarketContent: FC<{
   isLoading: boolean;
-  marketData: Results;
+  marketData: BestMarket;
   children: ReactNode;
 }> = ({ marketData, children, isLoading }) => {
   const [{ askPriceDelta, bidPriceDelta }, setPriceDelta] = useState<{
