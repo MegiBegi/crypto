@@ -40,7 +40,7 @@ const BestMarketContent: FC<{
       <Head>Crypto Kingdom!</Head>
 
       <Heading as="h2" size="2xl" mb="4">
-        Compare buying offers from Binance, Coinbase and Bitbay!
+        Compare market offers from Binance, Coinbase and Bitbay!
       </Heading>
 
       <Stat>
