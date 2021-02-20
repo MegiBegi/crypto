@@ -1,6 +1,6 @@
 import { ApolloServer } from "apollo-server-micro";
-import { typeDefs } from "../../graphql/schema";
 
+import { typeDefs } from "../../graphql/schema";
 import { fetchMarkets, getMarketData } from "../../lib/marketData";
 
 const resolvers = {

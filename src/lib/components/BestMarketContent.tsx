@@ -28,7 +28,7 @@ const BestMarketContent: FC<{
     askPriceDelta: null,
     bidPriceDelta: null,
   });
-  console.log(marketData);
+
   const marketDataPrev = usePrevious(marketData);
 
   useEffect(() => {

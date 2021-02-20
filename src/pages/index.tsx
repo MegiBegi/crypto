@@ -2,10 +2,12 @@ import React, { FC, useState } from "react";
 import { GetStaticProps } from "next";
 import debounce from "lodash.debounce";
 import { gql, useQuery } from "@apollo/client";
+import { Box, useColorMode, IconButton } from "@chakra-ui/react";
 
 import { getMarketData, fetchMarkets } from "../lib/marketData";
 import { Results } from "../lib/types";
 import BestMarketContent from "../lib/components/BestMarketContent";
+import { SunIcon, MoonIcon } from "@chakra-ui/icons";
 
 import {
   NumberInput,
@@ -38,6 +40,7 @@ const BestMarket: FC<SSG> = (props) => {
   const [btcAmount, setBTCAmount] = useState<number>(
     props.marketData.btcAmount
   );
+  const { colorMode, toggleColorMode } = useColorMode();
 
   const { loading, error, data = { bestMarket: props.marketData } } = useQuery(
     btcMarketDataQuery,
@@ -56,35 +59,59 @@ const BestMarket: FC<SSG> = (props) => {
   if (error) return <h1>{`An error has occurred: ${error}`}</h1>;
 
   return (
-    <BestMarketContent isLoading={loading} marketData={data?.bestMarket}>
-      <InputGroup>
-        <InputLeftElement
-          pointerEvents="none"
-          color="black.500"
-          fontSize="1.2em"
-          children="₿"
-          top="16px"
-          left="-10px"
-        />
-        <NumberInput
-          mt="4"
-          display="block"
-          defaultValue={2}
-          min={0}
-          placeholder="Enter amount"
-          w={250}
-          onChange={(value) => {
-            debouncedBTCAmount(Number(value));
-          }}
-        >
-          <NumberInputField />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
-      </InputGroup>
-    </BestMarketContent>
+    <Box
+      w="100%"
+      minH="100vh"
+      d="flex"
+      justifyContent="center"
+      backgroundImage={
+        colorMode === "dark"
+          ? "linear-gradient(rgb(125, 81, 3), rgb(71, 16, 165))"
+          : "linear-gradient(to bottom, #FEEBC8, #B794F4)"
+      }
+    >
+      <IconButton
+        variant="outline"
+        colorScheme="teal"
+        aria-label="Send email"
+        icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+        onClick={toggleColorMode}
+        position="absolute"
+        top="20px"
+        right="20px"
+        _hover={{ background: "none" }}
+      />
+
+      <BestMarketContent isLoading={loading} marketData={data?.bestMarket}>
+        <InputGroup>
+          <InputLeftElement
+            pointerEvents="none"
+            color="black.500"
+            fontSize="1.2em"
+            children="₿"
+            top="16px"
+            left="-10px"
+          />
+          <NumberInput
+            mt="4"
+            display="block"
+            defaultValue={2}
+            min={0}
+            placeholder="Enter amount"
+            w={250}
+            onChange={(value) => {
+              debouncedBTCAmount(Number(value));
+            }}
+          >
+            <NumberInputField />
+            <NumberInputStepper>
+              <NumberIncrementStepper />
+              <NumberDecrementStepper />
+            </NumberInputStepper>
+          </NumberInput>
+        </InputGroup>
+      </BestMarketContent>
+    </Box>
   );
 };
 
