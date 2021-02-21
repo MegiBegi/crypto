@@ -37,7 +37,7 @@ const BestMarketContent: FC<{
   }, [marketData]);
 
   return (
-    <Box maxW="32rem" mt="32" mb="32">
+    <Box maxW={["90%", "32rem"]} mt="32" mb="32">
       <Head>Crypto Kingdom!</Head>
 
       <Heading as="h2" size="2xl" mb="4">
