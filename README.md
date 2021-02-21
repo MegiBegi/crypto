@@ -1,5 +1,5 @@
 ## Stack
-- Written in Typescript within Next.js
+- Written in Typescript using SSG within Next.js
 - UI built with Chakra UI
 - Backend - frontend API in graphql <- keeping consistent types thanks to the Graphql Code Generator
 - Managing state using Apollo client
