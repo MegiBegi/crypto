@@ -1,10 +1,6 @@
 import React, { FC, useState, useEffect, ReactNode } from "react";
 import Head from "next/head";
 import { TimeIcon } from "@chakra-ui/icons";
-
-import { getPriceDeltas } from "../helpers";
-import { BestMarketResultsVariants } from "../types";
-import PrettyError from "../components/PrettyError";
 import {
   Stat,
   StatNumber,
@@ -13,6 +9,10 @@ import {
   Heading,
   Box,
 } from "@chakra-ui/react";
+
+import { getPriceDeltas } from "../helpers";
+import { BestMarketResultsVariants } from "../types";
+import PrettyError from "../components/PrettyError";
 import { usePrevious } from "../hooks";
 import BestMarketResults from "../components/BestMarketResults";
 import { BestMarket } from "../../generated/graphql";

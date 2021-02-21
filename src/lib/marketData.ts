@@ -1,5 +1,4 @@
 import { SingleMarketData } from "./types";
-
 import getBinancePrice from "./calculations/binance-calculations";
 import getCoinbasePrice from "./calculations/coinbase-calculations";
 import getBitbayPrice from "./calculations/bitbay-calculations";

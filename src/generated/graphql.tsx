@@ -27,17 +27,9 @@ export type BestMarket = {
   date: Scalars['String'];
 };
 
-export type NewBook = {
-  __typename?: 'NewBook';
-  books: Array<Scalars['String']>;
-  newies?: Maybe<Scalars['String']>;
-  id: Scalars['ID'];
-};
-
 export type Query = {
   __typename?: 'Query';
   bestMarket?: Maybe<BestMarket>;
-  newBook: NewBook;
 };
 
 

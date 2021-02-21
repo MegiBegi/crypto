@@ -11,14 +11,7 @@ export const typeDefs = gql`
     date: String!
   }
 
-  type NewBook {
-    books: [String!]!
-    newies: String
-    id: ID!
-  }
-
   type Query {
     bestMarket(btcAmount: Float!): BestMarket
-    newBook: NewBook!
   }
 `;

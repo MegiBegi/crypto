@@ -16,6 +16,7 @@ function MyApp({ Component, pageProps }) {
     initialColorMode: "light" as ColorMode,
     useSystemColorMode: false,
   };
+
   const theme = extendTheme({ config });
 
   return (
