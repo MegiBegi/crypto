@@ -18,20 +18,15 @@ import {
   InputGroup,
 } from "@chakra-ui/react";
 import { useConstant } from "../lib/hooks";
-import { BestMarket } from "../generated/types";
+import { BestMarket, useMarketDataQuery } from "../generated/graphql";
 
 type SSG = { marketData: BestMarket };
 
-const btcMarketDataQuery = gql`
-  query($btcAmount: Float!) {
-    bestMarket(btcAmount: $btcAmount) {
-      btcAmount
-      errors
-      bidsBestMarketName
-      asksBestMarketName
-      bidsBestUSDAmount
-      asksBestUSDAmount
-      date
+const newBookQuery = gql`
+  query {
+    newBook {
+      books
+      newies
     }
   }
 `;
@@ -42,13 +37,18 @@ const BestMarketData: FC<SSG> = (props) => {
   );
   const { colorMode, toggleColorMode } = useColorMode();
 
-  const { loading, error, data = { bestMarket: props.marketData } } = useQuery(
-    btcMarketDataQuery,
-    {
-      variables: { btcAmount },
-      pollInterval: btcAmount > 5 ? 3000 : 1000,
-    }
-  );
+  const {
+    loading,
+    error,
+    data = { bestMarket: props.marketData },
+  } = useMarketDataQuery({
+    variables: { btcAmount },
+    pollInterval: btcAmount > 5 ? 3000 : 1000,
+  });
+
+  const { data: bookData } = useQuery(newBookQuery);
+
+  console.log(bookData);
 
   const debouncedBTCAmount = useConstant(() =>
     debounce((val: number) => {

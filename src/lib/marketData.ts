@@ -1,8 +1,9 @@
-import { Results, SingleMarketData } from "./types";
+import { SingleMarketData } from "./types";
 
 import getBinancePrice from "./calculations/binance-calculations";
 import getCoinbasePrice from "./calculations/coinbase-calculations";
 import getBitbayPrice from "./calculations/bitbay-calculations";
+import { BestMarket } from "../generated/graphql";
 
 const getErrors = ({
   marketList,
@@ -71,7 +72,7 @@ export const getMarketData = ({
 }: {
   btcAmount: number;
   marketList: SingleMarketData[];
-}): Results | null => {
+}): BestMarket | null => {
   const date = new Date().toLocaleTimeString();
   const marketListFiltered = marketList.filter((market) => market.data);
 

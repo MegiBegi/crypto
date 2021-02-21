@@ -1,4 +1,4 @@
-import { BestMarket } from "../generated/types";
+import { BestMarket } from "../generated/graphql";
 
 export const getOrderBookValues = ({
   recordList,

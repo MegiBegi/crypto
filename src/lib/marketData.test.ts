@@ -1,6 +1,6 @@
 import { getMarketData } from "./marketData";
 import { MarketName, SingleMarketData } from "./types";
-import { BestMarket } from "../generated/types";
+import { BestMarket } from "../generated/graphql";
 
 describe("getMarketData", () => {
   beforeAll(() => {
