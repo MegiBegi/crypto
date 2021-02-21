@@ -22,8 +22,8 @@ export type BestMarket = {
   errors?: Maybe<Array<Maybe<Scalars['String']>>>;
   bidsBestMarketName: Scalars['String'];
   asksBestMarketName: Scalars['String'];
-  bidsBestUSDAmount?: Maybe<Scalars['Float']>;
-  asksBestUSDAmount?: Maybe<Scalars['Float']>;
+  bidsBestUSDAmount: Scalars['Float'];
+  asksBestUSDAmount: Scalars['Float'];
   date: Scalars['String'];
 };
 

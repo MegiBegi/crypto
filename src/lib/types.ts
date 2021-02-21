@@ -17,16 +17,6 @@ export type SingleMarketData = {
   } | null;
 };
 
-export type Results = {
-  btcAmount: number;
-  errors?: string[];
-  bidsBestMarketName: string;
-  asksBestMarketName: string;
-  bidsBestUSDAmount: number;
-  asksBestUSDAmount: number;
-  date: string;
-};
-
 export enum BestMarketResultsVariants {
   Sell = "sell",
   Buy = "buy",

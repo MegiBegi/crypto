@@ -1,5 +1,4 @@
 import { FC } from "react";
-
 import {
   Stat,
   StatNumber,
@@ -9,12 +8,14 @@ import {
   Spinner,
   Heading,
 } from "@chakra-ui/react";
-import { Results, BestMarketResultsVariants } from "../types";
+
+import { BestMarketResultsVariants } from "../types";
+import { BestMarket } from "../../generated/graphql";
 
 const BestMarketResults: FC<{
   variant: BestMarketResultsVariants;
   isLoading: boolean;
-  marketData: Results;
+  marketData: BestMarket;
   askPriceDelta: string | null;
   bidPriceDelta: string | null;
 }> = ({ variant, isLoading, marketData, askPriceDelta, bidPriceDelta }) => {

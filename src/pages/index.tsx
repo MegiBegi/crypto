@@ -1,7 +1,6 @@
 import React, { FC, useState } from "react";
 import { GetStaticProps } from "next";
 import debounce from "lodash.debounce";
-import { gql, useQuery } from "@apollo/client";
 import { Box, useColorMode, IconButton } from "@chakra-ui/react";
 
 import { getMarketData, fetchMarkets } from "../lib/marketData";
@@ -22,15 +21,6 @@ import { BestMarket, useMarketDataQuery } from "../generated/graphql";
 
 type SSG = { marketData: BestMarket };
 
-const newBookQuery = gql`
-  query {
-    newBook {
-      books
-      newies
-    }
-  }
-`;
-
 const BestMarketData: FC<SSG> = (props) => {
   const [btcAmount, setBTCAmount] = useState<number>(
     props.marketData.btcAmount
@@ -45,10 +35,6 @@ const BestMarketData: FC<SSG> = (props) => {
     variables: { btcAmount },
     pollInterval: btcAmount > 5 ? 3000 : 1000,
   });
-
-  const { data: bookData } = useQuery(newBookQuery);
-
-  console.log(bookData);
 
   const debouncedBTCAmount = useConstant(() =>
     debounce((val: number) => {

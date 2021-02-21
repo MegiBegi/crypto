@@ -6,8 +6,8 @@ export const typeDefs = gql`
     errors: [String]
     bidsBestMarketName: String!
     asksBestMarketName: String!
-    bidsBestUSDAmount: Float
-    asksBestUSDAmount: Float
+    bidsBestUSDAmount: Float!
+    asksBestUSDAmount: Float!
     date: String!
   }
 
