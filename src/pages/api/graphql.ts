@@ -5,7 +5,7 @@ import { fetchMarkets, getMarketData } from "../../lib/marketData";
 
 const resolvers = {
   Query: {
-    bestMarket: async (_parent, { btcAmount }, _context) => {
+    bestMarket: async (_parent, { btcAmount }) => {
       const marketList = await fetchMarkets(btcAmount);
       return getMarketData({ btcAmount, marketList });
     },
