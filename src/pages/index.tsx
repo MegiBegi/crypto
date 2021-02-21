@@ -1,13 +1,10 @@
 import React, { FC, useState } from "react";
 import { GetStaticProps } from "next";
 import debounce from "lodash.debounce";
-import { Box, useColorMode, IconButton } from "@chakra-ui/react";
-
-import { getMarketData, fetchMarkets } from "../lib/marketData";
-import BestMarketContent from "../lib/components/BestMarketContent";
-import { SunIcon, MoonIcon } from "@chakra-ui/icons";
-
 import {
+  Box,
+  useColorMode,
+  IconButton,
   NumberInput,
   NumberInputField,
   NumberInputStepper,
@@ -16,6 +13,10 @@ import {
   InputLeftElement,
   InputGroup,
 } from "@chakra-ui/react";
+import { SunIcon, MoonIcon } from "@chakra-ui/icons";
+
+import { getMarketData, fetchMarkets } from "../lib/marketData";
+import BestMarketContent from "../lib/components/BestMarketContent";
 import { useConstant } from "../lib/hooks";
 import { BestMarket, useMarketDataQuery } from "../generated/graphql";
 

@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { usePrevious } from "../hooks";
 import BestMarketResults from "../components/BestMarketResults";
-import { BestMarket } from "../../generated/types";
+import { BestMarket } from "../../generated/graphql";
 
 const BestMarketContent: FC<{
   isLoading: boolean;
