@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "codegen": "graphql-codegen --config codegen.yml",
+    "build": "yarn codegen && next build",
     "start": "next start",
-    "test": "jest",
-    "codegen": "graphql-codegen --config codegen.yml"
+    "test": "jest"
   },
   "dependencies": {
     "@apollo/client": "^3.3.10",
