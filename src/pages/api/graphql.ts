@@ -1,8 +1,8 @@
 import { ApolloServer } from "apollo-server-micro"
 import { NextApiHandler } from "next"
 
-import { typeDefs } from "../../graphql/schema"
-import { fetchMarkets, getMarketData } from "../../lib/marketData"
+import { typeDefs } from "src/graphql/schema"
+import { fetchMarkets, getMarketData } from "src/lib/marketData"
 import cors from "micro-cors"
 
 const resolvers = {

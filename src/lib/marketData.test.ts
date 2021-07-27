@@ -1,16 +1,16 @@
-import { getMarketData } from "./marketData";
-import { MarketName, SingleMarketData } from "./types";
-import { BestMarket } from "../generated/graphql";
+import { getMarketData } from "./marketData"
+import { MarketName, SingleMarketData } from "./types"
+import { BestMarket } from "src/generated/graphql"
 
 describe("getMarketData", () => {
   beforeAll(() => {
-    jest.useFakeTimers("modern");
-    jest.setSystemTime(new Date("2021-02-14T09:10:31.914Z"));
-  });
+    jest.useFakeTimers("modern")
+    jest.setSystemTime(new Date("2021-02-14T09:10:31.914Z"))
+  })
 
   afterAll(() => {
-    jest.useRealTimers();
-  });
+    jest.useRealTimers()
+  })
 
   it("tests result for all data available for BTC2", () => {
     const marketListMock: SingleMarketData[] = [
@@ -44,7 +44,7 @@ describe("getMarketData", () => {
           btcBidsSum: 2,
         },
       },
-    ];
+    ]
 
     const marketDataMock: BestMarket = {
       btcAmount: 2,
@@ -54,15 +54,15 @@ describe("getMarketData", () => {
       bidsBestUSDAmount: 100.43,
       asksBestUSDAmount: 100.5,
       date: "10:10:31",
-    };
+    }
 
     const marketData = getMarketData({
       btcAmount: 2,
       marketList: marketListMock,
-    });
+    })
 
-    expect(marketData).toEqual(marketDataMock);
-  });
+    expect(marketData).toEqual(marketDataMock)
+  })
 
   it("tests result for sell offers only available at Coinbase BTC200", () => {
     const marketListMock: SingleMarketData[] = [
@@ -96,7 +96,7 @@ describe("getMarketData", () => {
           btcAsksSum: 176,
         },
       },
-    ];
+    ]
 
     const marketDataMock: BestMarket = {
       btcAmount: 200,
@@ -112,13 +112,13 @@ describe("getMarketData", () => {
       bidsBestUSDAmount: 150000,
       asksBestUSDAmount: null,
       date: "10:10:31",
-    };
+    }
 
     const marketData = getMarketData({
       btcAmount: 200,
       marketList: marketListMock,
-    });
+    })
 
-    expect(marketData).toEqual(marketDataMock);
-  });
-});
+    expect(marketData).toEqual(marketDataMock)
+  })
+})

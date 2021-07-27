@@ -1,6 +1,6 @@
-import React, { FC, useState } from "react";
-import { GetStaticProps } from "next";
-import debounce from "lodash.debounce";
+import React, { FC, useState } from "react"
+import { GetStaticProps } from "next"
+import debounce from "lodash.debounce"
 import {
   Box,
   useColorMode,
@@ -12,38 +12,38 @@ import {
   NumberDecrementStepper,
   InputLeftElement,
   InputGroup,
-} from "@chakra-ui/react";
-import { SunIcon, MoonIcon } from "@chakra-ui/icons";
+} from "@chakra-ui/react"
+import { SunIcon, MoonIcon } from "@chakra-ui/icons"
 
-import { getMarketData, fetchMarkets } from "../lib/marketData";
-import BestMarketContent from "../lib/components/BestMarketContent";
-import { useConstant } from "../lib/hooks";
-import { BestMarket, useMarketDataQuery } from "../generated/graphql";
+import { getMarketData, fetchMarkets } from "src/lib/marketData"
+import BestMarketContent from "src/lib/components/BestMarketContent"
+import { useConstant } from "src/lib/hooks"
+import { BestMarket, useMarketDataQuery } from "src/generated/graphql"
 
-type SSG = { marketData: BestMarket };
+type SSG = { marketData: BestMarket }
 
-const BestMarketData: FC<SSG> = (props) => {
-  const [btcAmount, setBTCAmount] = useState<number>(
-    props.marketData.btcAmount
-  );
-  const { colorMode, toggleColorMode } = useColorMode();
+const BestMarketData: FC<SSG> = props => {
+  const [btcAmount, setBTCAmount] = useState<number>(props.marketData.btcAmount)
+  const { colorMode, toggleColorMode } = useColorMode()
 
   const {
-    loading,
     error,
+    loading,
     data = { bestMarket: props.marketData },
   } = useMarketDataQuery({
     variables: { btcAmount },
     pollInterval: btcAmount > 5 ? 3000 : 1000,
-  });
+    // Hack for a reported bug https://github.com/apollographql/apollo-client/issues/5531
+    notifyOnNetworkStatusChange: true,
+  })
 
   const debouncedBTCAmount = useConstant(() =>
     debounce((val: number) => {
-      setBTCAmount(val);
+      setBTCAmount(val)
     }, 250)
-  );
+  )
 
-  if (error) return <h1>{`An error has occurred: ${error}`}</h1>;
+  if (error) return <h1>{`An error has occurred: ${error}`}</h1>
 
   return (
     <Box
@@ -69,7 +69,7 @@ const BestMarketData: FC<SSG> = (props) => {
         _hover={{ background: "none" }}
       />
 
-      <BestMarketContent isLoading={loading} marketData={data?.bestMarket}>
+      <BestMarketContent marketData={data?.bestMarket} isLoading={loading}>
         <InputGroup>
           <InputLeftElement
             pointerEvents="none"
@@ -86,8 +86,8 @@ const BestMarketData: FC<SSG> = (props) => {
             min={0}
             placeholder="Enter amount"
             w={250}
-            onChange={(value) => {
-              debouncedBTCAmount(Number(value));
+            onChange={value => {
+              debouncedBTCAmount(Number(value))
             }}
           >
             <NumberInputField />
@@ -99,20 +99,20 @@ const BestMarketData: FC<SSG> = (props) => {
         </InputGroup>
       </BestMarketContent>
     </Box>
-  );
-};
+  )
+}
 
-export const getStaticProps: GetStaticProps<SSG> = async (context) => {
-  const btcAmount = 2;
-  const marketList = await fetchMarkets(btcAmount);
-  const marketData = getMarketData({ btcAmount, marketList });
+export const getStaticProps: GetStaticProps<SSG> = async context => {
+  const btcAmount = 2
+  const marketList = await fetchMarkets(btcAmount)
+  const marketData = getMarketData({ btcAmount, marketList })
 
-  if (!marketData) throw new Error("No data available atm");
+  if (!marketData) throw new Error("No data available atm")
 
   return {
     props: { marketData },
     revalidate: 5,
-  };
-};
+  }
+}
 
-export default BestMarketData;
+export default BestMarketData

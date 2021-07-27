@@ -1,40 +1,40 @@
-import React, { FC, useState, useEffect, ReactNode } from "react";
-import Head from "next/head";
-import { TimeIcon } from "@chakra-ui/icons";
+import React, { FC, useState, useEffect, ReactNode } from "react"
+import Head from "next/head"
+import { TimeIcon } from "@chakra-ui/icons"
 import {
   Stat,
   StatNumber,
   StatLabel,
-  Spinner,
   Heading,
   Box,
-} from "@chakra-ui/react";
+  Spinner,
+} from "@chakra-ui/react"
 
-import { getPriceDeltas } from "../helpers";
-import { BestMarketResultsVariants } from "../types";
-import PrettyError from "../components/PrettyError";
-import { usePrevious } from "../hooks";
-import BestMarketResults from "../components/BestMarketResults";
-import { BestMarket } from "../../generated/graphql";
+import { getPriceDeltas } from "../helpers"
+import { BestMarketResultsVariants } from "../types"
+import PrettyError from "../components/PrettyError"
+import { usePrevious } from "../hooks"
+import BestMarketResults from "../components/BestMarketResults"
+import { BestMarket } from "src/generated/graphql"
 
 const BestMarketContent: FC<{
-  isLoading: boolean;
-  marketData: BestMarket;
-  children: ReactNode;
+  marketData: BestMarket
+  children: ReactNode
+  isLoading?: boolean
 }> = ({ marketData, children, isLoading }) => {
   const [{ askPriceDelta, bidPriceDelta }, setPriceDelta] = useState<{
-    askPriceDelta: string | null;
-    bidPriceDelta: string | null;
+    askPriceDelta: string | null
+    bidPriceDelta: string | null
   }>({
     askPriceDelta: null,
     bidPriceDelta: null,
-  });
+  })
 
-  const marketDataPrev = usePrevious(marketData);
+  const marketDataPrev = usePrevious(marketData)
 
   useEffect(() => {
-    setPriceDelta(getPriceDeltas({ marketDataPrev, data: marketData }));
-  }, [marketData]);
+    setPriceDelta(getPriceDeltas({ marketDataPrev, data: marketData }))
+  }, [marketData])
 
   return (
     <Box maxW={["90%", "32rem"]} mt="32" mb="32">
@@ -46,40 +46,28 @@ const BestMarketContent: FC<{
 
       <Stat>
         <StatLabel>BTC</StatLabel>
-        <StatNumber>
-          {isLoading ? (
-            <Spinner size="xs" />
-          ) : (
-            `₿ ${marketData.btcAmount.toLocaleString()}`
-          )}
-        </StatNumber>
+        <StatNumber></StatNumber>
       </Stat>
 
       <BestMarketResults
         variant={BestMarketResultsVariants.Buy}
-        isLoading={isLoading}
         marketData={marketData}
         askPriceDelta={askPriceDelta}
         bidPriceDelta={bidPriceDelta}
       />
       <BestMarketResults
         variant={BestMarketResultsVariants.Sell}
-        isLoading={isLoading}
         marketData={marketData}
         askPriceDelta={askPriceDelta}
         bidPriceDelta={bidPriceDelta}
       />
 
       <h4>
-        {isLoading ? (
-          <Spinner size="xs" />
-        ) : (
-          marketData.errors?.map((error, index) => (
-            <div key={index}>
-              <PrettyError>{error}</PrettyError>
-            </div>
-          ))
-        )}
+        {marketData.errors?.map((error, index) => (
+          <div key={index}>
+            <PrettyError>{error}</PrettyError>
+          </div>
+        ))}
       </h4>
 
       <Heading as="h2" size="l" mt="4">
@@ -87,20 +75,15 @@ const BestMarketContent: FC<{
       </Heading>
       <Stat>
         <StatNumber>
-          {isLoading ? (
-            <Spinner size="xs" />
-          ) : (
-            <>
-              <TimeIcon w={6} h={6} mr="2" />
-              {marketData.date}
-            </>
-          )}
+          <TimeIcon w={6} h={6} mr="2" />
+          {marketData.date}
+          {isLoading && <Spinner size="xs" ml={1} />}
         </StatNumber>
       </Stat>
 
       {children}
     </Box>
-  );
-};
+  )
+}
 
-export default BestMarketContent;
+export default BestMarketContent

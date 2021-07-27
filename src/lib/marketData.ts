@@ -1,55 +1,55 @@
-import { SingleMarketData } from "./types";
-import getBinancePrice from "./calculations/binance-calculations";
-import getCoinbasePrice from "./calculations/coinbase-calculations";
-import getBitbayPrice from "./calculations/bitbay-calculations";
-import { BestMarket } from "../generated/graphql";
+import { SingleMarketData } from "./types"
+import getBinancePrice from "./calculations/binance-calculations"
+import getCoinbasePrice from "./calculations/coinbase-calculations"
+import getBitbayPrice from "./calculations/bitbay-calculations"
+import { BestMarket } from "src/generated/graphql"
 
 const getErrors = ({
   marketList,
 }: {
-  marketList: SingleMarketData[];
+  marketList: SingleMarketData[]
 }): string[] => {
-  const errors = [];
+  const errors = []
   const marketAsksWithOutOffers = marketList.filter(
-    (market) => !market || market.data.btcAsksSum !== market.data.btcAmount
-  );
+    market => !market || market.data.btcAsksSum !== market.data.btcAmount
+  )
 
   const marketBidsWithOutOffers = marketList.filter(
-    (market) => !market || market.data.btcBidsSum !== market.data.btcAmount
-  );
+    market => !market || market.data.btcBidsSum !== market.data.btcAmount
+  )
 
-  marketBidsWithOutOffers.forEach((market) => {
+  marketBidsWithOutOffers.forEach(market => {
     if (market.error) {
       errors.push(
         `Sorry, sell offers at ${market.marketName} are currently unavailable`
-      );
-      return;
+      )
+      return
     }
 
     errors.push(
       `Sorry, sell offers at ${
         market.marketName
       } are limited to ₿${market.data.btcBidsSum.toLocaleString()} sold for $${market.data.USDBidsAmount.toLocaleString()}`
-    );
-  });
+    )
+  })
 
-  marketAsksWithOutOffers.forEach((market) => {
+  marketAsksWithOutOffers.forEach(market => {
     if (market.error) {
       errors.push(
         `Sorry, buy offers at ${market.marketName} are currently unavailable`
-      );
-      return;
+      )
+      return
     }
 
     errors.push(
       `Sorry, buy offers at ${
         market.marketName
       } are limited to ₿${market.data.btcAsksSum.toLocaleString()} sold for $${market.data.USDAsksAmount.toLocaleString()}`
-    );
-  });
+    )
+  })
 
-  return errors;
-};
+  return errors
+}
 
 export const fetchMarkets = async (btcAmount: number) => {
   return await Promise.all([
@@ -62,38 +62,38 @@ export const fetchMarkets = async (btcAmount: number) => {
     getBitbayPrice({
       btcAmount,
     }),
-  ]);
-};
+  ])
+}
 
 export const getMarketData = ({
   btcAmount,
   marketList,
 }: {
-  btcAmount: number;
-  marketList: SingleMarketData[];
+  btcAmount: number
+  marketList: SingleMarketData[]
 }): BestMarket | null => {
-  const date = new Date().toLocaleTimeString();
-  const marketListFiltered = marketList.filter((market) => market.data);
+  const date = new Date().toLocaleTimeString()
+  const marketListFiltered = marketList.filter(market => market.data)
 
-  if (!marketListFiltered.length) return null;
+  if (!marketListFiltered.length) return null
 
   const bidsOffers = marketListFiltered.filter(
     ({ data: { btcBidsSum } }) => btcBidsSum === btcAmount
-  );
+  )
 
   const asksOffers = marketListFiltered.filter(
     ({ data: { btcAsksSum } }) => btcAsksSum === btcAmount
-  );
+  )
 
   const sortedBidsListByUSDAmount = bidsOffers.sort(
     (a, b) => b.data.USDBidsAmount - a.data.USDBidsAmount
-  );
+  )
 
   const sortedAsksListByUSDAmount = asksOffers.sort(
     (a, b) => a.data.USDAsksAmount - b.data.USDAsksAmount
-  );
+  )
 
-  const errors = getErrors({ marketList });
+  const errors = getErrors({ marketList })
 
   const marketData = {
     btcAmount,
@@ -105,7 +105,7 @@ export const getMarketData = ({
     bidsBestUSDAmount: sortedBidsListByUSDAmount[0]?.data.USDBidsAmount || null,
     asksBestUSDAmount: sortedAsksListByUSDAmount[0]?.data.USDAsksAmount || null,
     date,
-  };
+  }
 
-  return marketData;
-};
+  return marketData
+}
